@@ -20,20 +20,17 @@ action to be performed as a functor argument, thus losing the locality of refere
 	for_each( data.begin(), data.end(), action );
 
 And all that's just using the iterators the C++ Standard Library gives you; defining your own iterator is notoriously 
-complex. So, Andrei introduced a much simpler - and more powerful - abstraction: the Range. 
-[http://accu.org/content/conf2009/AndreiAlexandrescu_iterators-must-go.pdf].
+complex. So, Andrei introduced a much simpler - and more powerful - abstraction: the Range [1]. 
+
 
 There have been a few attempts to implement Andrei's ideas in C++ (he implemented them for D, and they form the basis 
 of the D Standard Library) but for one reason or another, it just hasn't caught on. Part of the reason for that is 
 that in order to take advantage of this new abstraction as Andrei envisioned it, you need a rewrite of the Standard 
 Library that uses Ranges instead of Iterators. For some reason, there seems to be little appetite for this. Some 
-implementations have arisen that are interoperable with C++ Standard Library algorithms 
-[http://www.boost.org/doc/libs/1_54_0/libs/range/doc/html/range/reference.html], 
-[https://github.com/dietmarkuehl/kuhllib/wiki/STL-2.0#andrei-alexandrescus-ranges], but even they appear to not have 
-had as much traction in the C++ community at large as might have been hoped. Similarly, there have been proposals to 
-the C++ Standards effort [http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2012/n3350.html], but still, not much 
-apparent interest in something that is little more than a thin wrapper around the existing C++ container types which
-are, after all, really just iterator factories.
+implementations have arisen that are interoperable with C++ Standard Library algorithms [2], [3], but even they appear 
+to not have had as much traction in the C++ community at large as might have been hoped. Similarly, there have been 
+proposals to the C++ Standards effort [4], but still, not much apparent interest in something that is little more than 
+a thin wrapper around the existing C++ container types which are, after all, really just iterator factories.
 
 Part of the reason Andrei himself implemented his idea of Ranges in D, rather than C++, was that C++ at the time 
 didn't provide good enough language support to make it straightforward. In particular, there was a C++ proposal at the
@@ -47,3 +44,805 @@ What problem are they attempting to solve?
 Time for a quick segue into a different world....
 
 
+The cross-pollination conundrum
+-------------------------------
+
+It's common knowledge among experienced programmers that an intimate understanding of a few different languages (and 
+a possibly less intimate knowledge of many) is a good thing. Techniques from one language can inform and inspire neat 
+solutions to problems in other languages. It's also common knowledge among experienced programmers that idiomatic 
+features of one language are not necessarily transferrable to other languages, and that doing so can result in code 
+that is truly incomprehensible to its readers. With both of those things in mind, I want to explore a little modern 
+C# idiom: {IEnumerable}, the C# Iterator.
+
+This interface is what permits the {foreach} loop in C#:
+
+	foreach( var item in container )
+	{
+		.... do interesting things with items
+	}
+
+C# has had {IEnumerable} from the very beginning, although it's undergone a few revisions over the years.
+
+{IEnumerable} forms the basis of a much higher-level abstraction than merely accessing the contents of containers, 
+however. It underpins all the functionality of LINQ [[ Specifically, LINQ for Objects, which operate on containers 
+rather than DataSources. ]], introduced in Visual Studio 2005 with .Net 3.5, and builds on one key feature of .Net 2.0 
+- the {yield} keyword, which creates an {IEnumerable} *on demand* (actually, it creates an implementation of 
+{IEnumerator<T>}, which is the /real/ iterator type). This facility means that iterating over an {IEnumerable} is lazy 
+- access to an element isn't performed until it's asked for. In C#, this is referred to as Deferred Execution.
+
+	var results =  container.Where( item => item.Id == expected )
+							.Select( filtered => filtered.Count.ToString() )
+							.Take( 2 );
+
+The reason lazy access is important is that no matter how many elements "container" has, the clauses for {Where} and 
+{Select} will be called a maximum of 2 times. Obviously, this is significant if {container} has 20 million items in it.
+
+So what has all this to do with C++? In the first case, the reason that {IEnumerable} works /as an interface/ in C# is 
+that it is implemented by all the standard containers, and is in fact very simple to implement for your own container 
+types. C++ has no such interface, and in fact, there is no actual relationship - inheritance or otherwise - between 
+the standard containers, or their iterator types. In the second case, does this entirely idiomatic C# translate at all 
+into C++? Or does it make for an incomprehensible mess? That is the nature of the cross-pollination conundrum.
+
+
+The missing lin[qk]?
+--------------------
+
+It should be clear that {IEnumerable} in C# has much more in common with Andrei Alexandrescu's vision of a Range than 
+it does with C++ iterators - or even iterator pairs. C++11 introduces many language features which allow a neat syntax 
+for it, such as lambda and type deduction facilities. Suppose there were a range type in C++; would it on its own 
+enable the implementation of something like {Select} or {Where} from C#? What might that look like?
+
+	auto result =  container.where( [&]( const thing & t ) { return t.name == expected; } )
+							.select( []( const thing & t ) { return to_string( t.count ); } )
+							.take( 2 );
+
+It's not inconceivable. 
+
+But.
+
+What type is container? We could implement a single type that has {where}, {select}, {take} and all the other things 
+needed as member functions. What really makes C#'s {IEnumerable} work is the existence of extension methods. The power 
+of that mechanism really shines through when you need to write your own function that fits in with other LINQ 
+facilities, and C++ has no analogue for that.  
+
+A much neater idea would be closer to the Alexandrescu range concept whereby {select} returns a specific kind of 
+range, and {where} returns a different kind of range. The chaining of those operations together as shown above would 
+still require some common base interface, and would still be hard to extend.
+
+Lastly there is also the question of lazy evaluation (or Deferred Execution) and efficiency. It's hard to see how to 
+make lazy evaluation safe in the above scenario, without resorting to passing functions around under the hood and 
+capturing state. As for efficiency, this idea of a single base class is raising the spectre of allocating stuff on the 
+heap (*gasp!*), and too many C++ programmers have got used to the flexibility and efficiency of templates and type 
+deduction of iterators to give it up that easily.
+
+So, there are questions.
+
+Perhaps we should wind back our expectations a little, start with something very, very simple, and see if it can be 
+implemented. Then we can look to see if we can build on small beginnings to do something more elaborate. 
+
+So. Where do we start?
+
+
+Write a test
+------------
+
+For the purposes of testing examples, assumptions and results, I'm using Catch [5] because it's easy to read, clear to 
+write and not too verbose.
+
+It should be obvious by now that the first step is to define a very simple and lightweight range type, upon which we 
+can somehow "hang" all of the operations we need. This range should be trivially initialisable from some standard 
+container. I'm going to make a conceptual leap here, because it's clear the range type needs a way to access the 
+"current" element, and to move forwards one position. With these operations, it's possible to make a simple check that 
+the "contents" of the range match the original data. Andrei Alexandrescu asserted that the pointer-like interface for
+iterators is a Bad Thing(tm), but I think it makes for a neat syntax, so I will stick with it.
+
+	TEST_CASE( "Range is constructable from standard collection and is iterable", "[range][init][iterable][stl]" )
+	{
+		std::vector< int > data { 1, 2, 3 };
+		auto range = make_range( data );
+
+		REQUIRE( *range++ == data[ 0 ] );
+		REQUIRE( *range++ == data[ 1 ] );
+		REQUIRE( *range++ == data[ 2 ] );
+	}
+
+What is required to make this test compile? The most obvious thing is {make_range} - is that a function or a class?
+In order to make it as general as possible, it should (obviously) be a template, and to take full advantage of 
+type-deduction it should be a function returning....what? Some type which exhibits the right interface. With just the 
+information in the test, we can sketch it out. Note that, with the use of {auto}, the actual type is never named. This 
+isn't a crucial observation, but does give us a lot of leeway on the choice of name. I have been unimaginitive, 
+however.
+
+	template< typename iterator_type >
+	class iterable_range
+	{
+		public:
+			iterable_range( iterator_type begin, iterator_type end )
+				: pos{ begin }, end_pos{ end } { }
+
+			auto operator*() const -> typename iterator_type::value_type
+			{
+				return *pos;
+			}
+
+			auto operator++( int ) -> iterable_range
+			{
+				iterable_range tmp{ *this };
+				++pos;
+				return tmp;
+			}
+
+		private:
+			iterator_type pos, end_pos;
+	};
+
+	template< typename container_type >
+	auto make_range( const container_type & ctr ) -> iterable_range< typename container_type::const_iterator >
+	{
+		return iterable_range< typename container_type::const_iterator >
+			{ std::begin( ctr ), std::end( ctr ) };
+	}
+
+There is nothing particularly startling about this. The {iterable_range} class just squirrels away a pair of iterators
+(the observant will already have noticed that {end} isn't used, but its purpose should be obvious!), and the 
+{make_range} function is really just a convenience for creating an instance of the class. The {iterable_range} is a 
+kind of "proto-range"; it's not terribly useful on its own, but it does form the basis for other things.
+
+
+True to type
+------------
+
+It's already time to do something a bit harder. Here's another test.
+
+	TEST_CASE( "Transformation of elements results in new range leaving originals intact", "[range][transform]" )
+	{
+		std::vector< int > data { 1, 2, 3 };
+		auto range = make_range( data );
+
+		auto result = select( range, []( int i ) { return std::to_string( i ); } );
+
+		std::string expected[] = { "1", "2", "3" };
+
+		REQUIRE( *result++ == expected[ 0 ] );
+		REQUIRE( *result++ == expected[ 1 ] );
+		REQUIRE( *result++ == expected[ 2 ] );
+
+		REQUIRE( *range++ == data[ 0 ] );
+		REQUIRE( *range++ == data[ 1 ] );
+		REQUIRE( *range++ == data[ 2 ] );
+	}
+
+I already mentioned the idea of having different range types, e.g. {select} provides a "selecting range", and {where}
+provides a "filtering range". The line {auto result = select( ...} now needs some function {select}, and something to 
+return - a transforming range type. It's going to need the same basic operations as the {iterable_range}, and it needs
+to operate on an underlying range. The operations on the new range defer to that underlying range type - which in this 
+case is an {iterable_range}. 
+
+	template< typename range_type, typename transformation >
+	class transforming_range
+	{
+		public:
+			transforming_range( range_type r, transformation fn ) : r{ r }, fn{ fn } { }
+
+		private:
+			range_type r;
+			transformation fn;
+	};
+
+The incrementing operator should be straightforward enough - it needs to increment the underlying range object and 
+return a copy of its previous self.
+
+	auto operator++( int ) -> transforming_range
+	{
+		transforming_range tmp{ *this };
+		r++;
+		return tmp;
+	}
+
+What about the dereference operator? It needs to call the transformation function {fn} with the current element, and 
+return its result.
+
+	auto operator*() const -> ???
+	{
+		return fn( *r );
+	}
+
+C++11 provides an army of tools for determining the types of things at compile time for situations like this. The one 
+with the most visibility, {decltype}, provides the declared type of an expression - including the result of calling a 
+function.
+
+	auto fn( int ) -> bool { return true; }
+	auto fn( double ) -> int { return 10; }
+	auto type = decltype( fn( 10 ) ); // type is bool - type returned if fn were called with an int
+
+This makes determining the result of {operator*()} very simple. The only restriction on this use is that both {fn} and 
+{r} need to have already been "seen", which leads to the need to declare them before they are used in the {decltype} 
+expression.
+
+	private:
+		range_type r;
+		transformation fn;
+
+	public:
+		auto operator*() const -> decltype( fn( *r ) )
+		{
+			return fn( *r );
+		}
+
+I normally much prefer to declare classes with the {public} section at the top, where it's most obvious and visible.
+However, it seems a fair trade in this case to allow the use of {decltype} in such a simple fashion. The alternative
+is *much* worse! [[ Alright, you'd need something like {auto operator*() const -> typename 
+std::result_of< transformation( decltype( *std::declval< range_type >() ) ) >::type} I hope you agree that declaring 
+{private} at the top is a small price to pay! ]].
+
+With this addition, the {transforming_range} class should pass all the tests, after we add the now-trivial {select} 
+function.
+
+	template< typename range_type, typename transformation >
+	auto select( range_type r, transformation fn ) -> transforming_range< range_type, transformation >
+	{
+		return transforming_range< range_type, transformation >{ r, fn };
+	}
+
+
+Just the good ones
+------------------
+
+Time for another test.
+
+	TEST_CASE( "Filtering elements contains just the matches", "[range][filter]" )
+	{
+		std::vector< int > data { 1, 2, 3 };
+		auto range = make_range( data );
+
+		auto result = where( range, []( int i ) { return i % 2 != 0; } );
+
+		REQUIRE( *result++ == data[ 0 ] );
+		REQUIRE( *result++ == data[ 2 ] );
+	}
+
+With all the funky stuff learned implementing the {transforming_range}, implementing a {filtering_range} to be 
+returned by a {where} function should be pretty straightforward.
+
+	template< typename range_type, typename unary_predicate >
+	class filtering_range
+	{
+		private:
+			range_type r;
+			unary_predicate fn;
+
+		public:
+			filtering_range( range_type r, unary_predicate fn ) : r{ r }, fn{ fn } { }
+
+			auto operator*() const -> decltype( *r )
+			{
+				return *r;
+			}
+
+			auto operator++( int ) -> filtering_range
+			{
+				filtering_range tmp{ *this };
+				r++;
+				while( !fn( *r ) ) r++;
+				return tmp;
+			}
+	};
+
+The cleverness is all in {operator++()}, which keeps incrementing until the predicate is false. The {where} function
+is simplicity itself - almost identical to {select}, just returning a different range type.
+
+	template< typename range_type, typename filter >
+	auto where( range_type r, filter fn ) -> filtering_range< range_type, filter >
+	{
+		return filtering_range< range_type, filter >{ r, fn };
+	}
+
+Run the tests....and they all pass. Time for the next one....
+
+
+Wait a moment!
+--------------
+
+Once again, the observant among you will have already spotted the completely fatal flaws in that code. Just to labour 
+the point, here's a test that exposes one of them.
+
+	TEST_CASE( "Filtering range returns correct matches when first element is a mismatch", "[range][filter][empty]" )
+	{
+		std::vector< int > data { 2, 3, 4 };
+		auto range = make_range( data );
+
+		auto result = where( range, []( int i ) { return i % 2 != 0; } );
+
+		REQUIRE( *result++ == data[ 1 ] );
+	}
+
+The problem here is that the filtering range is fine if the first element in the range matches the predicate. In any 
+other case, it fails the test. Hopefully, this starts a chain of thought leading to questions like "what if no 
+elements match?" and then "what if the initial range is empty?". *Now* we know why the {iterable_range} has an {end}
+iterator! We need some sort of check that the range object is valid - that it hasn't run out of elements. Fortunately,
+it is trivial to implement a safe conversion to {bool} on all three of our range types. For {iterable_range}, it 
+returns {false} if {pos==end_pos} and {true} otherwise. For {transforming_range} and {filtering_range}, it simply 
+returns the value for the underlying range. C++11 provides an {explicit} conversion operator - which means the new 
+function won't take part in any arithmetic or otherwise unsafe operations.
+
+	explicit iterable_range::operator bool() const { return pos != end_pos; }
+	explicit transforming_range::operator bool() const { return !!r; }
+
+The slightly odd {!!r} says what it does: "not not", invoking the underlying range's {bool} conversion. Because the 
+conversion is {explicit}, just {return r;} won't work, of course! [[ More verbose but perhaps more descriptive might be 
+{return static_cast< bool >( r );}. ]]
+
+With the addition of this rather important facility, we can add a helper function to {filtering_range} called 
+{find_next_match}.
+
+	void find_next_match()
+	{
+		while( r && !fn( *r ) )
+			++r;
+	}
+
+This function is invoked by {operator*()} (thus making {filtering_range} lazy-evaluated), so finds the first matching 
+element. The increment operator also needs to invoke it to ensure a range with no further matches becomes invalidated.
+
+This implies that client code must first check that the range is valid before invoking {operator*()} [[ The 
+"functional" approach to this problem is {any}, which returns {false} if a range contains no elements. ]], and so 
+{operator bool()} must /also/ invoke it in order to detect a range with no matching elements.
+
+Time for some more tests!
+
+	TEST_CASE( "Filtering range is immediately invalid when no elements match", "[range][filter][nomatch]" )
+	{
+		std::vector< int > data { 2, 3, 4 };
+		auto range = make_range( data );
+
+		auto result = where( range, []( int ) { return false; } );
+
+		REQUIRE( ! result );
+	}
+
+	TEST_CASE( "Filtering range returns correct matches when first element is a mismatch", "[range][filter][empty]" )
+	{
+		std::vector< int > data { 2, 3, 4 };
+		auto range = make_range( data );
+
+		auto result = where( range, []( int i ) { return i % 2 != 0; } );
+
+		REQUIRE( !!result );
+		REQUIRE( *result++ == data[ 1 ] );
+	}
+
+Whilst we're at it, we'll add a prefix {operator++()} to all the range types, too (did I manage to slip that one past 
+you in the implementation of {find_next_match}?), since efficiency is one of our design principles.
+
+For {filtering_range}, that operator is used by the postfix version, and looks like the following:
+
+	auto operator++() -> filtering_range &
+	{
+		++r;
+		find_next_match();
+		return *this;
+	}
+
+Now we're really cooking. It must be time to turn the world upside down yet again.
+
+
+Joined up
+---------
+
+It should be fairly clear how to implement {take} using the techniques already discussed here. What's missing is the 
+ability to chain expressions together. In fact, our existing API allows a limited form of composing expressions.
+
+	auto result = select( where( []( int i ) { return i % 2 != 0; } ), []( int i ) { return i * 2; } );
+
+This is somewhat unwieldy, however, especially when composing more than a small number of expressions.
+
+As already noted, we could add a common base class declaring all the high-level functionality like {select}, {where} 
+and so on. The trouble with this approach is that it's inflexible; it would be difficult to extend with new operations. 
+
+It's not possible to overload {operator.()} in C++, so directly mimicking the syntax of extension methods is out, but 
+there are other operators we could use. There is something appealing about hijacking the "pipe" operation common in 
+filesystem operations. Time for another test.
+
+	TEST_CASE( "Range results can be composed using simple syntax", "[range][composition]" )
+	{
+		std::vector< int > data { 1, 2, 3 };
+		auto range = make_range( data );
+
+		auto result = range | where( []( int i ) { return i % 2 != 0; } )
+							| select( []( int i ) { return i * 10; } );
+
+		REQUIRE( *result++ == data[ 0 ] * 10 );
+		REQUIRE( *result++ == data[ 2 ] * 10 );
+		REQUIRE( ! result );
+	}
+
+The main thing to note here is that the signatures of the range functions {select} and {where} have changed - they no
+longer take a range object - almost as if the range is being passed in through some "standard input". This suggests
+some global operator, perhaps like this:
+
+	template< typename left_range_type, typename right_range_type >
+	auto operator|( left_range_type left, right_range_type right ) -> ???
+	{
+		???
+	}
+
+The question is - what should it return? Perhaps it would be simpler to see the solution to this using actual named 
+funtions instead of overloaded operators.
+
+	auto result =  range.apply( where( []( int i ) { return i % 2 != 0; } ) )
+						.apply( select( []( int i ) { return i * 10; } ) );
+
+This is similar enough to actual chaining, there appears to be some merit to following it to see where it leads.
+
+The first obstacle is this redefinition of {select} and {where}. To take {where} as an example, it cannot construct 
+an instance of {filtering_range}, because that type requires an underlying range object on which to operate. The 
+range object isn't supplied until {apply} is called - whatever that is. It looks from here very much like a member 
+function common to all range types. Given that {where} can't return a {filtering_range}, but must capture the 
+filtering predicate somehow, another intermediate type is indicated. This intermediate is what gets passed to {apply},
+and is a factory for the real range type. The {apply} function then invokes that factory to create a real range type.
+
+One approach to this might be to have a separate intermediate factory for every range type; this would certainly make 
+the implementation simple: the {filtering_range} would have a {filtering_range_factory}, and the implementation of 
+that would know how to construct a {filtering_range} given an underlying range object to construct it with.
+
+However, for the cases in this example at least, there is a more general solution. Once again we look to Andrei 
+Alexandrescu, and make use of a simple policy template. The {where} function "knows" it requires a {filtering_range}, 
+but has insufficient data or template parameters to actually create one. If the {filtering_range_factory} makes use 
+of a template-template parameter, it can create a {filtering_range} when all the parameters required are available.
+This can be generalised out to a factory that can create any range type that takes 2 template parameters.
+
+	template< template< typename, typename > class range_type, typename expression_type >
+	class range_factory
+	{
+		public:
+			range_factory( expression_type action ) : action{ action } { }
+
+			template< typename range_of >
+			auto operator()( range_of r ) const -> range_type< range_of, expression_type > 
+			{ 
+				return range_type< range_of, expression_type >{ r, action }; 
+			}
+
+		private:
+			expression_type action;
+	};
+
+Now, the {where} function instantiates the factory with the required range /type/ ({filtering_range}), and the
+predicate function to be captured.
+
+	template< typename unary_predicate >
+	auto where( unary_predicate fn ) -> range_factory< filtering_range, unary_predicate >
+	{
+		return range_factory< filtering_range, unary_predicate >{ fn };
+	}
+
+The {select} function can do the analogous operation using {transforming_range}.
+
+With this information, we can now implement the {apply} function. Our original vision was to replace {apply} with an 
+overload of {operator|()}. Whilst {apply} needed to be a member function to allow chaining calls together, the 
+overloaded operator does *not* need to be a member. We can sidestep {apply} altogether, and jump straight to the 
+{operator|()} implementation, to make our original test for this pass. All that's needed is to call the function-call
+operator on the provided factory with the provided underlying range object.
+
+	template< typename range_type, typename range_factory_type >
+	auto operator|( range_type range, range_factory_type factory ) -> decltype( factory( range ) )
+	{
+		return factory( range );
+	}
+
+	TEST_CASE( "Range results can be composed using simple syntax", "[range][composition]" )
+	{
+		std::vector< int > data { 1, 2, 3 };
+		auto range = make_range( data );
+
+		auto result = range | where( []( int i ) { return i % 2 != 0; } )
+							| select( []( int i ) { return i * 10; } );
+
+		REQUIRE( *result++ == data[ 0 ] * 10 );
+		REQUIRE( *result++ == data[ 2 ] * 10 );
+		REQUIRE( ! result );
+	}
+
+
+Extensions
+----------
+
+One of the motivations for the ease of chaining operations was to make the API easy to extend. Let's see how well
+we've achieved that, and write {take}. The idea is that {take} produces a range of up to a given number of elements.
+If the original range has fewer than the requested number, then all are returned.
+
+	TEST_CASE( "Range can be limited to a number of elements with take", "[range][take]" )
+	{
+		std::vector< int > data { 1, 2, 3, 4, 5 };
+		auto range = make_range( data );
+
+		auto result = range | take( 2 );
+
+		REQUIRE( *result++ == data[ 0 ] );
+		REQUIRE( *result++ == data[ 1 ] );
+		REQUIRE( !result );
+	}
+
+Implementing the range used - let's call it {limited_range} - looks straightforward; {operator bool()} just needs to 
+return false after a certain number of iterations of the underlying range. The problem with this one is the 
+implementation of the helper function: {take} itself. Up to this point, the {range_factory} has had a simple task of 
+creating any one of a number of different range types that all had in common their template parameters and 
+construction; each one with 2 template parameters, and a constructor that took a range-type and functor-type.
+
+Let's take a quick look at the basic construction of a {limited_range}
+
+	template< typename range_type >
+	class limited_range
+	{
+		public:
+			limited_range( range_type r, int count ) 
+			
+Only one template parameter, and the count, which can't be made into a template parameter because it might not be a 
+constant. The {range_factory} now needs to do something different, i.e. be able to create objects having either one or 
+two template parameters.
+
+The existing {range_factory} exists because the type of the underlying range isn't known until the range operation
+(e.g. {select}) is invoked via the {operator|()} mechanism. Introducing a new range type with only one template 
+parameter means the original "action expression", which for {take} is just a number, still needs to be captured before
+the range object is created, but the range type is still not known.
+
+This means the basic mechanism is the same, but the implementation of {operator()()} needs to vary according to the 
+number of template arguments for the target range type. The ideal solution to this would be to create a partial
+specialization of {range_factory} using variadic templates to represent the differences. Something like this:
+
+	template< template< typename, typename... > class range_type, typename expression_type >
+	struct range_factory { };
+
+	template< template< typename, typename, typename... > class range_type, typename expression_type >
+	struct range_factory< range_factory< range_type, expression_type > > { };
+
+This would rely on factory types with 2 or more template parameters matching the specialisation, and those with only 
+one template parameter matching the primary. However, the rules of partial specialization don't allow this; the primary 
+template's implicit types ({range_type} and {expression_type}) aren't distinguishable from the specialization, so the 
+second struct is ambiguous.
+
+It doesn't prevent a new factory type which understands how to create types having only one template parameter, and 
+having the {take} function use it directly.
+
+	template< template< typename > class range_type, typename expression_type >
+	class range_factory_1
+	{
+
+It is otherwise idential to {range_factory}, except for {operator()()}
+
+	template< typename range_of >
+	auto operator()( range_of r ) const -> range_type< range_of >
+	{ 				
+		return range_type< range_of >{ r, action };
+	}
+
+The only difference here is the number of template arguments provided to the {range_type} in the factory function.
+
+This solution works, but it does require any other extensions to know which ...{factory} class to invoke. It's not a 
+catastrophe, but it could be made easier. Instead of variadic templates and specialization, we turn to ordinary
+function overloading to come to the rescue. Instead of creating the correct factory type directly, {take} can use a 
+call to a function which is overloaded based on the same template-template upon which we wished we could specialize 
+{range_factory}. 
+
+	template< template< typename, typename > class range_type, typename expression_type >
+	auto make_range_factory( expression_type expr ) -> range_factory< range_type, expression_type >
+	{
+		return range_factory< range_type, expression_type >{ expr };
+	}
+
+	template< template< typename > class range_type, typename expression_type >
+	auto make_range_factory( expression_type expr ) -> range_factory_1< range_type, expression_type >
+	{
+		return range_factory_1< range_type, expression_type >{ expr };
+	}
+
+This pair of function overloads selects the correct factory class to construct based on the number of template 
+parameters required by the {range_type} template-template. Any function that now needs a {range_factory} or 
+{range_factory_1} can just use the overloaded function and provide the correct type for that factory to create, and 
+overloading will do the rest.
+
+	auto take( size_t count ) -> decltype( make_range_factory< limited_range >( count ) )
+	{
+		return make_range_factory< limited_range >( count );
+	}
+
+	template< typename unary_predicate >
+	auto where( unary_predicate fn ) -> decltype( make_range_factory< filtering_range >( fn ) )
+	{
+		return make_range_factory< filtering_range >{ fn };
+	}
+
+Here is the {take} function implemented to use the new factory factory function (!), and using the same function return
+type deduction as used previously, with {decltype}. I've also re-implemented {where} to show the usage is identical; 
+these two functions make use of /different/ range factory types, but that is merely "implementation detail".
+
+It's not unreasonable to imagine range implementation classes needing more template arguments. In such cases, the 
+corresponding {range_factory}_N and {make_range_factory} overload pair would be needed, but in practice, one and two 
+template parameter range types cover most of the most useful things.
+
+
+All done
+--------
+
+This article set out with the stated aim of implementing something not dissimilar to the simple C# LINQ expression 
+which does simple filtering, transformation and range-limiting. With the implementation so far, it's *very* similar 
+(but not exactly the same, for some good reasons).
+
+	var result = container.Where( item => item.Id == expected )
+				   		  .Select( filtered => filtered.Count.ToString() )
+						  .Take( 2 );
+
+	auto result = range | where( [&]( const thing & t ) { return t.name == expected; } )
+						| select( []( const thing & t ) { return to_string( t.count ); } )
+						| take( 2 );
+
+There was a mention in passing, however, of being able to interoperate with the existing C++ Standard Library 
+implementations, without losing efficiency. The high-level API achieved here is certainly not just a thin wrapper
+around C++ iterators; it provides a very rich and type-safe platform which is extended fairly easily (at least, no 
+more difficult than extending C#'s {IEnumerable} facilities). How hard is it to go the extra step, and allow this new
+range type to play nicely with C++ algorithms?
+
+With some restrictions, it's very simple. Those restrictions again are inspired by C#'s LINQ: {IEnumerable} is an
+/immutable/ interface. You cannot modify elements of it, nor modify the range represented by it, without going via 
+some concrete container type, which in C# means calling {ToList()} or {ToArray()} on the range.
+
+I believe immutability isn't an unreasonable restriction on this kind of programming. With increased focus on 
+concurrency and multi-processing to achieve better performance, and with both of those techniques benefiting greatly 
+from the use of immutable data, making the ranges that this API operates on immutable isn't a restriction, it's a 
+design principle.
+
+Turning an immutable range into mutable data which works with mutating algorithms requires the C++ equivalent of 
+{ToList()}.
+
+Let's see if we can express what is required for that in another test.
+
+	TEST_CASE( "Range can be used to populate a standard lib container", "[range][export][stl]" )
+	{
+		std::vector< int > data { 1, 2, 3 };
+		auto range = make_range( data ) | select( []( int x ) { return std::to_string( x ); } );
+
+		std::vector< std::string > result { begin( range ), end( range ) };
+
+		REQUIRE( result.size() == data.size() );
+		REQUIRE( std::to_string( data[ 0 ] ) == result[ 0 ] );
+		REQUIRE( std::to_string( data[ 1 ] ) == result[ 1 ] );
+		REQUIRE( std::to_string( data[ 2 ] ) == result[ 2 ] );
+	}
+
+This highlights the fact that in C++, containers and algorithms work with /pairs/ of iterators - the {[begin, end)}
+"range", whereas the range types described in this article encapsulate the pair of iterators into a single item.
+Implementing {begin} for the range type looks straightforward - perhaps the necessary operations (only an 
+{InputIterator}'s operations are required) could be added to the range types, so equivalence operators {!=} and {==}.
+The possible difficulty might be in implementing {end}. 
+
+There is also precedence for writing {end} when an end position isn't known: {std::ostream_iterator} uses a sentry
+type (effectively an invalid position created by the default constructor), so a similar technique could be employed
+here. The only way to find the end of a Range is to consume it, which is obviously undesirable.
+
+There's more to a C++ Iterator than {++}, {*}, {!=} and {==} however, in practice. There are some embedded typedefs to
+consider as well, which is usually captured by inheriting from {std::iterator}. So, instead of making changes to all of 
+the range types, or some common base class, it seems to be a better separation of concerns to implement the necessary 
+iterator type separately. As already noted, only the operations and types associated with {InputIterator}s are needed
+if range types are immutable. Most of the required operations are easy enough to write.
+
+	template< typename range_type, typename value_type >
+	class range_input_iterator : public std::iterator< std::input_iterator_tag, value_type >
+	{
+		public:
+			range_input_iterator( const range_type & r ) 
+				: r{ r } 
+			{
+			}
+
+			auto operator==( const range_input_iterator & ) const -> bool
+			{
+				???
+			}
+
+			auto operator!=( const range_input_iterator & r ) const -> bool
+			{
+				return !operator==( r );
+			}
+
+			auto operator++() -> range_intput_iterator & 
+			{
+				++r;
+				return *this;
+			}
+
+			auto operator*() const -> value_type
+			{
+				return *r;
+			}
+
+		private:
+			range_type r;
+			
+	};
+
+The sticking point is to decide how to implement {operator==()}. How to compare two ranges to see if their current 
+positions are the same, in the same range of iterators? Time to step back and consider: how would the {std::vector}
+constructor taking two iterators be implemented? Something very like:
+
+	vector( iterator b, iterator e )
+	{
+		while( b != e )
+			push_back( *b++ );
+	}
+
+The point here is that the most important consideration is the comparison to the "end" position, which our ranges 
+/already do/ to determine {operator bool()}, needed for other things internally. If we make the assumption that such 
+comparisons are only ever between a valid range and the end of the same range, then {operator==()} can use 
+{operator bool()} - two ranges always compare equal if the first is valid.
+
+A side effect of this is that the right-hand-side of an expression {range_l == range_r} is never used, so it doesn't 
+matter what {end} returns - it doesn't even need to be a default-constructed sentry value (which would be difficult, 
+given the lack of default constructors of the range types).
+
+	auto operator==( const range_input_iterator & ) const -> bool
+	{
+		return !r;
+	}
+
+The implementations of {begin} and {end} therefore become:
+
+	template< typename range_type >
+	auto begin( range_type r ) -> range_input_iterator< range_type, decltype( *r ) >
+	{
+		return range_input_iterator< range_type, decltype( *r ) >{ r };
+	}
+	template< typename range_type >
+	auto end( range_type r ) -> range_input_iterator< range_type, decltype( *r ) >
+	{
+		return range_input_iterator< range_type, decltype( *r ) >{ r };
+	}
+
+That's not a printing error: they are identical in implementation. {end} merely has to return something of the 
+correct /type/ - it is never used, not even to compare with anything. 
+
+A side effect of this is that interoperability with non-mutating C++ algorithms is achieved for free, for example 
+{std::copy( begin( r ), end( r ), std::back_inserter( my_list ) ); }.
+
+
+To conclude
+-----------
+
+There have been a few range libraries developed for C++ over recent years, but none seem to have had the same take-up
+as ranges have in D, for example. I think it's partly because C++ iterator pairs have become such a central part of 
+writing C++ programs that use the Standard Library, partly because such range libraries that there are are either 
+clunky to use, or have disappointing behaviour regarding the C++ Standard Library, and partly because there are 
+actually no really compelling use cases for them that can't be achieved using other techniques.
+
+In this article, I set out to demonstrate some uses for a very lightweight range type that's very easy to use, and 
+provides facilities that are very widely used in a different language - C# - which in turn took the ideas of 
+functional languages and coupled them with what some people describe as the ultimate declarative language, SQL.
+
+C++ has many functional facilities, and many of the standard algorithms mirror functional constructs. {std::transform} 
+is essentially a list comprehension, but lacks the brevity and simplicity of transformations in truly functional 
+languages, at least in part because it uses two iterator-pairs to represent separate ranges.
+
+The C# {Select} expression to transform one {IEnumerable} into another captures the simple case that is most common -
+turn every element into a new range of some new type - and C++'s {transform} doesn't really even compete. A simple 
+range type for C++ overcomes the problems with having that simplicity, whilst still allowing simple and efficient
+interoperability with existing C++ Standard Library facilities.
+
+All the code in this article compiles with GCC 4.6.3 (with -std=c++0x) on Ubuntu, and GCC 4.8.1 (with -std=c++11) and Microsoft Visual Studio 2013 CP on Windows. It's available from https://github.com/essennell/narl.
+
+
+Acknowledgements
+----------------
+
+Many thanks to Andy Sawyer and Roger Orr for fixing some of my misunderstandings of {decltype} and trailing return 
+types, Jon Wakely for helping me understand *why* partial specialisation of types based just on the number of 
+template-template parameters doesn't work, and to Frances Buontempo, Roger Orr and Chris Oldwood for reading 
+early revisions of the article and spotting my inevitable errors.
+
+
+References
+----------
+
+[1] http://accu.org/content/conf2009/AndreiAlexandrescu_iterators-must-go.pdf.
+[2] http://www.boost.org/doc/libs/1_54_0/libs/range/doc/html/range/reference.html
+[3] https://github.com/dietmarkuehl/kuhllib/wiki/STL-2.0#andrei-alexandrescus-ranges
+[4] http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2012/n3350.html
+[5] https://github.com/philsquared/Catch
