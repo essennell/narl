@@ -19,7 +19,10 @@ struct throwing_range
 
 	auto operator++() -> throwing_range & { throw range_access_exception( "Preincrement" ); }
 	auto operator++( int ) -> throwing_range { throw range_access_exception( "Postincrement" ); }
+	auto operator--() -> throwing_range & { throw range_access_exception( "Predecrement" ); }
+	auto operator--( int ) -> throwing_range { throw range_access_exception( "Postdecrement" ); }
 	auto operator*() const -> T { throw range_access_exception( "Expression evaluation" ); }
 	explicit operator bool() const { throw range_access_exception( "Validity" ); }
+	void goto_end() { throw range_access_exception( "GotoEnd" ); }
 };
 

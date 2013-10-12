@@ -1,6 +1,7 @@
 #include "testnarl.h"
 
-#include <narl.h>
+#include <filtering_range.h>
+#include <iterable_range.h>
 
 #include <catch.hpp>
 
@@ -88,6 +89,65 @@ TEST_CASE( "Filtering range becomes invalid after last match", "[narl][filtering
 	++src;
 	REQUIRE( *r++ == *src );
 	REQUIRE( !r );
+}
+
+
+TEST_CASE( "Filtering range can be decremented to find previous match", "[narl][filtering_range][decrement]" )
+{
+	auto src = from( { 1, 2, 3, 4, 5 } );
+	auto r = make_test_range< filtering_range >( src, []( int i ) { return i % 2 == 0; } );
+	++r; ++r;
+
+	REQUIRE( *r == 4 );
+	--r;
+	REQUIRE( *r == 2 );
+}
+
+
+TEST_CASE( "Filtering range is invalid when decremented from first match", "[narl][filtering_range][decrement][invalid]" )
+{
+	auto src = from( { 1, 2, 3 } );
+	auto r = make_test_range< filtering_range >( src, []( int i ){ return i % 2 == 0; } );
+	
+	REQUIRE( *r == 2 );
+	--r;
+	REQUIRE( !r );
+}
+
+
+TEST_CASE( "Filtering range goes to first match after decrement followed by increment", "[narl][filtering_range][decrementandincrement]" )
+{
+	auto src = from( { 1, 2, 3 } );
+	auto r = make_test_range< filtering_range >( src, []( int i ) { return i % 2 == 0; } );
+	REQUIRE( *r == 2 );
+	--r;
+	REQUIRE( !r );
+	++r;
+	REQUIRE( *r == 2 );
+}
+
+
+TEST_CASE( "Filtering range goes to last match after increment followed by decrement", "[narl][filtering_range][incrementanddecrement]" )
+{
+	auto src = from( { 1, 2, 3 } );
+	auto r = make_test_range< filtering_range >( src, []( int i ) { return i % 2 == 0; } );
+
+	REQUIRE( *r++ == 2 );
+	REQUIRE( !r-- );
+	REQUIRE( !!r );
+	REQUIRE( *r == 2 );
+}
+
+
+TEST_CASE( "Filtering range can be moved to the end", "[narl][filtering_range][goto_end]" )
+{
+	auto src = from( { 1, 2, 3, 4, 5 } );
+	auto r = make_test_range< filtering_range >( src, []( int i ) { return i % 2 == 0; } );
+	r.goto_end();
+
+	REQUIRE( !r );
+	--r;
+	REQUIRE( *r == 4 );
 }
 
 

@@ -1,5 +1,7 @@
 #pragma once
 
+#include "range_factory.h"
+
 
 namespace narl
 {
@@ -14,8 +16,8 @@ namespace narl
 
 
 		public:
-			transforming_range( range_type r, transformation expr )
-				: r{ r }, expr{ expr }
+			transforming_range( const range_type & r, const transformation & expr )
+				: r{ r }, expr( expr )
 			{
 			}
 
@@ -38,11 +40,36 @@ namespace narl
 				return tmp;
 			}
 
+			auto operator--() -> transforming_range &
+			{
+				--r;
+				return *this;
+			}
+
+			auto operator--( int ) -> transforming_range
+			{
+				transforming_range tmp{ *this };
+				--*this;
+				return tmp;
+			}
+
 			explicit operator bool() const
 			{
 				return !!r;
 			}
 
+			void goto_end()
+			{
+				r.goto_end();
+			}
+
 	};
+
+
+	template< typename expression >
+	auto select( const expression & expr ) -> decltype( make_factory< transforming_range >( expr ) )
+	{
+		return make_factory< transforming_range >( expr );
+	}
 
 }

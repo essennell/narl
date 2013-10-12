@@ -1,12 +1,9 @@
 #include "testnarl.h"
 
-#include <narl.h>
+#include <iterable_range.h>
+#include <transforming_range.h>
 
 #include <catch.hpp>
-
-#include <algorithm>
-#include <iostream>
-#include <iterator>
 
 
 using namespace narl;
@@ -60,6 +57,47 @@ TEST_CASE( "Transforming range becomes invalid if post-incremented past the end"
 	REQUIRE( !!r );
 	r++;
 	REQUIRE( !r );
+}
+
+
+TEST_CASE( "Transforming range can be decremented to yield previous value", "[narl][transforming_range][decrement]" )
+{
+	auto r = make_test_range< transforming_range >( from( { 1, 2 } ), []( int i ) { return i * 10; } );
+	++r;
+	REQUIRE( *r-- == 20 );
+	REQUIRE( *r-- == 10 );
+	REQUIRE( !r );
+}
+
+
+
+TEST_CASE( "Transforming range can be pre-decremented to yield previous value", "[narl][transforming_range][pre-decrement]" )
+{
+	auto r = make_test_range< transforming_range >( from( { 1, 2 } ), []( int i ) { return i * 10; } );
+	++r;
+	--r;
+	REQUIRE( *r == 10 );
+}
+
+
+TEST_CASE( "Transforming range is invalid when before begin", "[narl][transforming_range][pastbegin]" )
+{
+	auto r = make_test_range< transforming_range >( from( { 1, 2 } ), []( int i ) { return i * 10; } );
+	--r;
+	REQUIRE( !r );
+	++r;
+	REQUIRE( !!r );
+	REQUIRE( *r == 10 );
+}
+
+
+TEST_CASE( "Transforming range can be moved to the end", "[narl][transforming_range][goto_end]" )
+{
+	auto r = make_test_range< transforming_range >( from( { 1, 2 } ), []( int i ) { return i * 10; } );
+	r.goto_end();
+	REQUIRE( !r );
+	--r;
+	REQUIRE( !!r );
 }
 
 

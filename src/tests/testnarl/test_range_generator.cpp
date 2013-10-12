@@ -1,4 +1,5 @@
-#include <narl.h>
+#include <range_factory.h>
+#include <range_generator.h>
 
 #include <catch.hpp>
 

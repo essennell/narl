@@ -5,109 +5,12 @@
 
 #include <narl.h>
 
-#include <algorithm>
 #include <array>
-#include <iterator>
-#include <iostream>
-#include <stdexcept>
-#include <type_traits>
+#include <string>
 #include <vector>
 
 
 using namespace narl;
-
-
-TEST_CASE( "Range is created from vector source", "[narl][create][vector]" )
-{
-	std::vector< int > src { 1, 2, 3 };
-	auto r = from( src );
-
-	REQUIRE( ( std::is_same< int, decltype( *r ) >() ) );
-	REQUIRE( !!r );
-}
-
-
-TEST_CASE( "Range is created from built in array source", "[narl][create][builtinarray]" )
-{
-	int src[] = { 1, 2, 3 };
-	auto r = from( src );
-
-	REQUIRE( ( std::is_same< int, decltype( *r ) >() ) );
-	REQUIRE( !!r );
-}
-
-
-TEST_CASE( "Range is created from static array source", "[narl][create][staticarray]" )
-{
-	std::array< int, 3 > src { 1, 2, 3 };
-	auto r = from( src );
-
-	REQUIRE( ( std::is_same< int, decltype( *r ) >() ) );
-	REQUIRE( !!r );
-}
-
-
-TEST_CASE( "Range is created from initializer list source", "[narl][create][initializer_list]" )
-{
-	auto r = from( { 1, 2, 3 } );
-
-	REQUIRE( ( std::is_same< int, decltype( *r ) >() ) );
-	REQUIRE( !!r );
-}
-
-
-TEST_CASE( "Range created from single element initializer list has one element", "[narl][create][initializer_list][single]" )
-{
-	auto r = from( { 1 } );
-	REQUIRE( !!r++ );
-	REQUIRE( !r );
-}
-
-
-TEST_CASE( "Range created from empty source is immediately invalid", "[narl][create][empty][invalid]" )
-{
-	std::vector< int > src;
-	auto r = from( src );
-
-	REQUIRE( !r );
-}
-
-
-TEST_CASE( "Range can be incremented to yield next value", "[narl][increment]" )
-{
-	auto r = from( { 1, 2 } );
-	
-	REQUIRE( *r++ == 1 );
-	REQUIRE( *r++ == 2 );
-}
-
-
-TEST_CASE( "Range can be pre-incremented to yield next value", "[narl][preincrement]" )
-{
-	auto r = from( { 1, 2 } );
-
-	++r;
-	REQUIRE( *r == 2 );
-}
-
-
-TEST_CASE( "Range is invalid after incrementing past last element", "[narl][increment][invalid]" )
-{
-	auto r = from( { 1 } );
-
-	REQUIRE( !!r );
-	++r;
-	REQUIRE( !r );
-}
-
-
-TEST_CASE( "Dereferencing an invalid range produces error", "[narl][dereference][invalid][error]" )
-{
-	auto r = from( { 1 } );
-	++r;
-
-	REQUIRE_THROWS_AS( *r, std::out_of_range );
-}
 
 
 TEST_CASE( "Range operates with range-based for", "[narl][range_for]" )
@@ -205,6 +108,25 @@ TEST_CASE( "Take contains the specified count of elements", "[narl][take]" )
 }
 
 
+TEST_CASE( "Skip from a filtered range ignores the specified count of elements", "[narl][skip][where]" )
+{
+	auto r = from( { 1, 2, 3, 4, 5, 6 } ) | where( []( int i ) { return i % 2 == 0; } ) | skip( 2 );
+
+	REQUIRE( *r++ == 6 );
+	REQUIRE( !r );
+}
+
+
+TEST_CASE( "Take from a filtered range contains the specified count of elements", "[narl][take][where]" )
+{
+	auto r = from( { 1, 2, 3, 4, 5, 6 } ) | where( []( int i ) { return i % 2 == 0; } ) | take( 2 );
+
+	REQUIRE( *r++ == 2 );
+	REQUIRE( *r++ == 4 );
+	REQUIRE( !r );
+}
+
+
 TEST_CASE( "Skipwhile ignores elements matching the expression", "[narl][skip][while]" )
 {
 	auto r = make_range< int >() | skip_while( []( int i ) { return i < 5; } );
@@ -268,5 +190,488 @@ TEST_CASE( "Where produces only elements that match the condition", "[narl][wher
 	REQUIRE( !r );
 }
 
+TEST_CASE( "Sort produces elements in order according to comparer", "[narl][sorted]" )
+{
+	auto r = from( { 2, 3, 1, 4, 0 } ) | sorted( []( int l, int r ) { return l < r; } );
+	auto expected = make_range< int >();
+	
+	REQUIRE( *r++ == *expected++ );
+	REQUIRE( *r++ == *expected++ );
+	REQUIRE( *r++ == *expected++ );
+	REQUIRE( *r++ == *expected++ );
+	REQUIRE( *r++ == *expected++ );
+	REQUIRE( !r );
+}
 
 
+TEST_CASE( "Sort without a comparer just uses less than", "[narl][sorted][default]" )
+{
+	auto r = from( { 2, 3, 1, 4, 0 } ) | sorted();
+	auto expected = make_range< int >();
+	
+	REQUIRE( *r++ == *expected++ );
+	REQUIRE( *r++ == *expected++ );
+	REQUIRE( *r++ == *expected++ );
+	REQUIRE( *r++ == *expected++ );
+	REQUIRE( *r++ == *expected++ );
+	REQUIRE( !r );
+}
+
+
+TEST_CASE( "Reverse produces elements in reverse order", "[narl][reverse]" )
+{
+	auto r = from( { 2, 1, 0 } ) | reverse();
+	auto expected = make_range< int >();
+
+	for( auto i : r )
+	{
+		REQUIRE( i == *expected++ );
+	}
+}
+
+
+TEST_CASE( "Reverse reverses a transformed range", "[narl][reverse][transforming_range]" )
+{
+	auto r = from( { 1, 2, 3 } ) | select( []( int i ) { return i * 5; } ) | reverse();
+	auto expected = from( { 15, 10, 5 } );
+
+	for( auto i : r )
+	{
+		REQUIRE( i == *expected++ );
+	}
+}
+
+
+TEST_CASE( "Reverse reverses a filter range", "[narl][reverse][where]" )
+{
+	auto r = from( { 1, 2, 3, 4, 5 } )
+				| where( []( int i ) { return i % 2 == 0; } )
+				| reverse();
+	auto expected = from( { 4, 2 } );
+
+	for( auto i : r )
+	{
+		REQUIRE( i == *expected++ );
+	}
+}
+
+
+TEST_CASE( "Reversing a reversed range produces original range", "[narl][reverse][reversed]" )
+{
+	std::vector< int > src { 1, 2, 3, 4 };
+	auto r = from( src )
+			| reverse()
+			| reverse();
+
+	REQUIRE( *r++ == 1 );
+	REQUIRE( *r++ == 2 );
+	REQUIRE( *r++ == 3 );
+	REQUIRE( *r++ == 4 );
+	REQUIRE( !r );
+}
+
+
+
+TEST_CASE( "Reverse produces elements in reverse order from take", "[narl][reverse][take]" )
+{
+	auto r = from( { 1, 2, 3, 4, 5 } )
+			| take( 2 )
+			| reverse();
+	auto expected = from( { 2, 1 } );
+
+	for( auto i : r )
+	{
+		REQUIRE( i == *expected++ );
+	}
+}
+
+
+TEST_CASE( "Reverse fails to compile for infinite range", "[narl][reverse][infinite]" )
+{
+	auto r = make_range< int >() | reverse();
+	//REQUIRE( !r );
+}
+
+
+TEST_CASE( "Reverse produces elements in reverse order from skip", "[narl][reverse][skip]" )
+{
+	auto r = from( { 1, 2, 3, 4, 5 } )
+			| skip( 3 )
+			| reverse();
+	auto expected = from( { 5, 4 } );
+
+	for( auto i : r )
+	{
+		REQUIRE( i == *expected++ );
+	}
+}
+
+
+TEST_CASE( "Reverse fails to compile for skip from infinite range", "[narl][reverse][skip][infinite]" )
+{
+	auto r = make_range< int >() | skip( 20 ) | reverse();
+	//REQUIRE( !r );
+}
+
+
+TEST_CASE( "Any returns true if any elements match", "[narl][any][expression][true]" )
+{
+	auto r = from( { 1, 2 } ) | any( []( int i ) { return i == 2; } );
+	REQUIRE( !!r );
+}
+
+
+TEST_CASE( "Any returns false if no elements match", "[narl][any][expression][false]" )
+{
+	auto r = from( { 1, 2 } ) | any( []( int i ) { return i == 3; } );
+	REQUIRE( !r );
+}
+
+
+TEST_CASE( "Any with no expression returns true if range has elements", "[narl][any][true]" )
+{
+	auto r = from( { 1 } ) | any();
+	REQUIRE( !!r );
+}
+
+
+TEST_CASE( "Any with no expression returns false if range has no elements", "[narl][any][false]" )
+{
+	std::vector< int > src;
+	auto r = from( src ) | any();
+	REQUIRE( !r );
+}
+
+
+TEST_CASE( "All returns true if all elements match", "[narl][all][expression][true]" )
+{
+	auto r = from( { 1, 2 } ) | all( []( int i ) { return i < 3; } );
+	REQUIRE( !!r );
+}
+
+
+TEST_CASE( "All returns false if any elements mismatch", "[narl][all][expression][true]" )
+{
+	auto r = from( { 1, 2 } ) | all( []( int i ) { return i == 1; } );
+	REQUIRE( !r );
+}
+
+
+TEST_CASE( "All returns true for range with no elements", "[narl][all][true][empty]" )
+{
+	std::vector< int > src;
+	auto r = from( src ) | all( []( int ) { return false; } );
+	REQUIRE( !!r );
+}
+
+
+TEST_CASE( "Concat produces 2 ranges", "[narl][concat]" )
+{
+	auto r = from( { 1, 2 } ) | concat( from( { 3, 4 } ) );
+
+	REQUIRE( *r++ == 1 );
+	REQUIRE( *r++ == 2 );
+	REQUIRE( *r++ == 3 );
+	REQUIRE( *r++ == 4 );
+	REQUIRE( !r );
+}
+
+
+TEST_CASE( "Concat can be reversed", "[narl][concat][reverse]" )
+{
+	auto r = from( { 1, 2 } ) | concat( from( { 3, 4 } ) ) | reverse();
+
+	REQUIRE( *r++ == 4 );
+	REQUIRE( *r++ == 3 );
+	REQUIRE( *r++ == 2 );
+	REQUIRE( *r++ == 1 );
+	REQUIRE( !r );
+}
+
+
+TEST_CASE( "Except produces unique set of all results not in second range", "[narl][except]" )
+{
+	auto r = from( { 1, 2, 2, 3, 4, 5 } ) | except( from( { 3, 4, 4 } ) );
+
+	REQUIRE( *r++ == 1 );
+	REQUIRE( *r++ == 2 );
+	REQUIRE( *r++ == 5 );
+	REQUIRE( !r );
+}
+
+
+TEST_CASE( "Reversed except produces reversed list of all results not in second range", "[narl][except][reverse]" )
+{
+	auto r = from( { 1, 2, 2, 3, 4, 5 } ) | except( from( { 3, 4, 4 } ) ) | reverse();
+
+	REQUIRE( *r++ == 5 );
+	REQUIRE( *r++ == 2 );
+	REQUIRE( *r++ == 1 );
+	REQUIRE( !r );
+}
+
+
+TEST_CASE( "Except operates on a sorted range", "[narl][except][sorted]" )
+{
+	auto r = from( { 4, 3, 5, 2, 1, 0 } ) | sorted( []( int l, int r ) { return l < r; } ) | except( from( { 2, 4 } ) );
+
+	REQUIRE( *r++ == 0 );
+	REQUIRE( *r++ == 1 );
+	REQUIRE( *r++ == 3 );
+	REQUIRE( *r++ == 5 );
+	REQUIRE( !r );
+}
+
+
+TEST_CASE( "Except operates on a sorted range in reverse", "[narl][except][sorted][reverse]" )
+{
+	auto r = from( { 4, 3, 5, 2, 1, 0 } ) | sorted( []( int l, int r ) { return l < r; } ) | except( from( { 2, 4 } ) ) | reverse();
+
+	REQUIRE( *r++ == 5 );
+	REQUIRE( *r++ == 3 );
+	REQUIRE( *r++ == 1 );
+	REQUIRE( *r++ == 0 );
+	REQUIRE( !r );
+}
+
+
+TEST_CASE( "Except can be used with custom comparer", "[narl][except][comparer]" )
+{
+	auto r = from( { 5, 4, 3, 2, 2, 1 } ) | except( from( { 4, 4, 3 } ), []( int l, int r ) { return l > r; } );
+
+	REQUIRE( *r++ == 5 );
+	REQUIRE( *r++ == 2 );
+	REQUIRE( *r++ == 1 );
+	REQUIRE( !r );
+}
+
+
+TEST_CASE( "Intersect produces unique set of matched results", "[narl][intersect]" )
+{
+	auto r = from( { 2, 4, 4, 8, 16, 32, 32, 64, 128 } ) | intersect_with( from( { 1, 2, 3, 4, 5, 6, 7, 8 } ) );
+
+	REQUIRE( *r++ == 2 );
+	REQUIRE( *r++ == 4 );
+	REQUIRE( *r++ == 8 );
+	REQUIRE( !r );
+}
+
+
+TEST_CASE( "Reversed intersect produces reversed list of matched results", "[narl][intersect][reverse]" )
+{
+	auto r = from( { 2, 4, 4, 8, 16, 32, 32, 64, 128 } ) | intersect_with( from( { 1, 2, 3, 4, 5, 6, 7, 8 } ) ) | reverse();
+
+	REQUIRE( *r++ == 8 );
+	REQUIRE( *r++ == 4 );
+	REQUIRE( *r++ == 2 );
+	REQUIRE( !r );
+}
+
+
+TEST_CASE( "Intersect operates with custom comparer", "[narl][intersect][comparer]" )
+{
+	auto r = from( { 128, 64, 32, 32, 16, 8, 4, 4, 2 } ) | intersect_with( from( { 8, 7, 6, 5, 4, 3, 2, 1 } ), []( int l, int r ) { return l > r; } );
+
+	REQUIRE( *r++ == 8 );
+	REQUIRE( *r++ == 4 );
+	REQUIRE( *r++ == 2 );
+
+	REQUIRE( !r );
+}
+
+
+TEST_CASE( "Union produces unique set of all results", "[narl][union]" )
+{
+	auto r = from( { 1, 2, 2, 3, 4, 5 } ) | union_with( from( { 2, 3, 3, 4, 5 } ) );
+
+	REQUIRE( *r++ == 1 );
+	REQUIRE( *r++ == 2 );
+	REQUIRE( *r++ == 3 );
+	REQUIRE( *r++ == 4 );
+	REQUIRE( *r++ == 5 );
+	REQUIRE( !r );
+}
+
+
+TEST_CASE( "Union operates with custom comparer", "[narl][union][comparer]" )
+{
+	auto r = from( { 5, 4, 3, 2, 2, 1 } ) | union_with( from( { 5, 4, 3, 3, 2 } ), []( int l, int r ) { return l > r; } );
+
+	REQUIRE( *r++ == 5 );
+	REQUIRE( *r++ == 4 );
+	REQUIRE( *r++ == 3 );
+	REQUIRE( *r++ == 2 );
+	REQUIRE( *r++ == 1 );
+	REQUIRE( !r );
+}
+
+
+TEST_CASE( "Reversed union produces reversed list of matched results", "[narl][union][reverse]" )
+{
+	auto r = from( { 1, 2, 2, 3, 4, 5 } ) | union_with( from( { 2, 3, 3, 4, 5 } ) ) | reverse();
+
+	REQUIRE( *r++ == 5 );
+	REQUIRE( *r++ == 4 );
+	REQUIRE( *r++ == 3 );
+	REQUIRE( *r++ == 2 );
+	REQUIRE( *r++ == 1 );
+	REQUIRE( !r );
+}
+
+
+TEST_CASE( "Groupby produces range grouped by key", "[narl][groupby]" )
+{
+	auto r = from( { 1, 1, 2 } ) | groupby( []( int i ) { return i; } );
+
+	auto i = *r++;
+	auto v = i.values;
+	REQUIRE( i.key == 1 );
+	REQUIRE( *v++ == 1 );
+	REQUIRE( *v++ == 1 );
+	REQUIRE( !v );
+	
+	i = *r++;
+	v = i.values;
+	REQUIRE( i.key == 2 );
+	REQUIRE( *v++ == 2 );
+	REQUIRE( !v );
+	REQUIRE( !r );
+}
+
+
+#ifndef _MSC_VER2
+
+TEST_CASE( "Zipwith single rhs returns tuple of 2 items", "[narl][zipwith][2]" )
+{
+	auto r = from( { 1, 2, 3 } ) | zipwith( from( { 10, 20, 30 } ) );
+
+	auto v = *r;
+	CAPTURE( std::get< 0 >( v ) );
+	CAPTURE( std::get< 1 >( v ) );
+	REQUIRE( *r++ == std::make_tuple( 1, 10 ) );
+	REQUIRE( *r++ == std::make_tuple( 2, 20 ) );
+	REQUIRE( *r++ == std::make_tuple( 3, 30 ) );
+
+	REQUIRE( !r );
+}
+
+
+TEST_CASE( "Zipwith two rhs returns tuple of 3 items", "[narl][zipwith][3]" )
+{
+	auto r = from( { 1, 2, 3 } ) | zipwith( from( { "10", "20", "30" } ), from( { 100, 200, 300 } ) );
+
+	REQUIRE( *r++ == std::make_tuple( 1, "10", 100 ) );
+	REQUIRE( *r++ == std::make_tuple( 2, "20", 200 ) );
+	REQUIRE( *r++ == std::make_tuple( 3, "30", 300 ) );
+
+	REQUIRE( !r );
+}
+
+
+TEST_CASE( "Zipwith three rhs returns tuple of 4 items", "[narl][zipwith][4]" )
+{
+	auto r = from( { 1, 2, 3 } ) | zipwith( from( { 10, 20, 30 } ), from( { std::string( "100" ), std::string( "200" ), std::string( "300" ) } ), from( { 1000, 2000, 3000 } ) );
+
+	REQUIRE( *r++ == std::make_tuple( 1, 10, std::string( "100" ), 1000 ) );
+	REQUIRE( *r++ == std::make_tuple( 2, 20, std::string( "200" ), 2000 ) );
+	REQUIRE( *r++ == std::make_tuple( 3, 30, std::string( "300" ), 3000 ) );
+
+	REQUIRE( !r );
+}
+
+#endif
+
+TEST_CASE( "Aggregate produces reduction value of a range given a seed as starting point", "[narl][aggregate][withseed]" )
+{
+	auto r = from( { 2, 3, 4 } ) | aggregate( 2, []( int c, int i ) { return c * i; } );
+	REQUIRE( r == 48 );
+}
+
+
+TEST_CASE( "Aggregate produces reduction value of a range using first element as starting point", "[narl][aggregate][noseed]" )
+{
+	auto r = from( { 2, 3, 4 } ) | aggregate( []( int c, int i ) { return c * i; } );
+	REQUIRE( r == 24 );
+}
+
+
+TEST_CASE( "Count produces the number of elements in a collection", "[narl][count]" )
+{
+	auto r = from( { 1, 2, 3 } ) | count();
+	REQUIRE( r == 3 );
+}
+
+
+TEST_CASE( "Count produces zero for empty range", "[narl][count][empty]" )
+{
+	std::vector< int > src;
+	auto r = from( src ) | count();
+	REQUIRE( r == 0 );
+}
+
+
+TEST_CASE( "Count produces zero for invalid range", "[narl][count][empty]" )
+{
+	auto r = from( { 1 } );
+	++r;
+	REQUIRE( ( r | count() ) == 0 );
+}
+
+
+TEST_CASE( "Count of a filtered range only counts matches", "[narl][count][where]" )
+{
+	auto r = from( { 1, 2, 3, 4, 5 } ) | where( []( int i ) { return i % 2 != 0; } ) | count();
+	REQUIRE( r == 3 );
+}
+
+TEST_CASE( "Count of a distinct range only counts non duplicates", "[narl][distinct][count]" )
+{
+	auto r = from( { 1, 1, 2, 3, 3, 4, 5, 5 } ) | distinct() | reverse() | count();
+
+	REQUIRE( r == 5 );
+}
+
+
+TEST_CASE( "Range can be make distinct", "[narl][distinct]" )
+{
+	auto r = from( { 1, 1, 2, 3, 3, 4, 5, 5 } ) | distinct();
+
+	REQUIRE( *r++ == 1 );
+	REQUIRE( *r++ == 2 );
+	REQUIRE( *r++ == 3 );
+	REQUIRE( *r++ == 4 );
+	REQUIRE( *r++ == 5 );
+	REQUIRE( !r );
+}
+
+
+TEST_CASE( "Distinct range can be reversed", "[narl][distinct][reverse]" )
+{
+	auto r = from( { 1, 1, 2, 3, 3, 4, 5, 5 } ) | distinct() | reverse();
+
+	REQUIRE( *r++ == 5 );
+	REQUIRE( *r++ == 4 );
+	REQUIRE( *r++ == 3 );
+	REQUIRE( *r++ == 2 );
+	REQUIRE( *r++ == 1 );
+	REQUIRE( !r );
+}
+
+
+
+/*
+TEST_CASE( "Range can be used as default constructed local", "[narl][range][local]" )
+{
+	range< int > r;
+
+	REQUIRE( !r );
+
+	r = from( { 1, 2, 3 } );
+	REQUIRE( !!r );
+	REQUIRE( *r++ == 1 );
+	REQUIRE( *r++ == 2 );
+	REQUIRE( *r++ == 3 );
+	REQUIRE( !r );
+}
+
+*/

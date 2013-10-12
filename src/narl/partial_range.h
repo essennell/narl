@@ -1,5 +1,7 @@
 #pragma once
 
+#include "range_factory.h"
+
 
 namespace narl
 {
@@ -14,7 +16,7 @@ namespace narl
 
 
 		public:
-			partial_range( range_type r, limiting_type limiter )
+			partial_range( const range_type & r, const limiting_type & limiter )
 				: r{ r }, limiter{ limiter }
 			{
 			}
@@ -41,6 +43,27 @@ namespace narl
 				return tmp;
 			}
 
+			auto operator--() -> partial_range &
+			{
+				limiter.skip( r );
+				limiter.back( r );
+				return *this;
+			}
+
+			auto operator--( int ) -> partial_range
+			{
+				limiter.skip( r );
+				partial_range tmp{ *this };
+				--*this;
+				return tmp;
+			}
+
+			void goto_end()
+			{
+				limiter.skip( r );
+				limiter.goto_end( r );
+			}
+
 			explicit operator bool() const
 			{
 				limiter.skip( r );
@@ -59,7 +82,7 @@ namespace narl
 
 		public:
 			skipper( unsigned count ) 
-				: count{ count } 
+				: count{ count }, pos{ 1 }
 			{ }
 
 
@@ -77,16 +100,37 @@ namespace narl
 			template< typename range_type >
 			void step( range_type & r ) 
 			{ 
-				if( r )
-					++r; 
+				if( pos == 0 || r )
+				{
+					++r;
+					++pos;
+				}
+			}
+
+			template< typename range_type >
+			void back( range_type & r )
+			{
+				if( pos > 0 )
+				{
+					--r;
+					--pos;
+				}
 			}
 
 			auto valid() -> bool 
 			{ 
-				return true; 
+				return pos > 0; 
+			}
+
+			template< typename range_type >
+			void goto_end( range_type & r )
+			{
+				while( r )
+					step( r );
 			}
 			
 			unsigned count;
+			unsigned pos;
 
 	};
 
@@ -99,7 +143,7 @@ namespace narl
 
 		public:
 			taker( unsigned count ) 
-				: count{ count } 
+				: start{ count }, count{ count } 
 			{ }
 
 
@@ -110,18 +154,36 @@ namespace narl
 			template< typename range_type >
 			void step( range_type & r ) 
 			{ 
-				if( valid() && r ) 
+				if( count > start || ( count > 0 && r ) )
 				{ 
 					--count; 
 					++r; 
 				}
 			}
+
+			template< typename range_type >
+			void back( range_type & r )
+			{
+				if( count <= start && r )
+				{
+					++count;
+					--r;
+				}
+			}
 			
 			auto valid() -> bool 
 			{ 
-				return count > 0; 
+				return count <= start && count > 0; 
+			}
+
+			template< typename range_type >
+			void goto_end( range_type & r )
+			{
+				while( valid() && r )
+					step( r );
 			}
 			
+			unsigned start;
 			unsigned count;
 
 	};
@@ -136,8 +198,8 @@ namespace narl
 
 
 		public:
-			skipping_while( expression expr ) 
-				: expr{ expr }, skipped{ false }
+			skipping_while( const expression & expr ) 
+				: skipped{ false }, expr( expr ), pos{ 1 }
 			{ }
 
 
@@ -154,21 +216,42 @@ namespace narl
 			void step( range_type & r ) 
 			{ 
 				if( r )
+				{
 					++r; 
+					++pos;
+				}
+			}
+
+			template< typename range_type >
+			void back( range_type & r )
+			{
+				if( pos > 0 )
+				{
+					--r;
+					--pos;
+				}
 			}
 
 			auto valid() -> bool 
 			{ 
-				return true; 
+				return pos > 0; 
 			}
 			
-			expression expr;
+			template< typename range_type >
+			void goto_end( range_type & r )
+			{
+				while( r )
+					step( r );
+			}
+
 			bool skipped;
+			expression expr;
+			unsigned pos;
 
 	};
 
 	template< typename expression >
-	auto make_skipping_while( expression expr ) -> skipping_while< expression >
+	auto make_skipping_while( const expression & expr ) -> skipping_while< expression >
 	{
 		return skipping_while< expression >{ expr };
 	}
@@ -183,8 +266,8 @@ namespace narl
 
 
 		public:
-			taking_while( expression expr ) 
-				: expr{ expr }, stopped{ false }
+			taking_while( const expression & expr ) 
+				: expr( expr ), stopped{ false }, pos{ 1 }
 			{ }
 
 
@@ -206,24 +289,70 @@ namespace narl
 			template< typename range_type >
 			void step( range_type & r ) 
 			{ 
-				if( check( r ) )
+				if( pos == 0 || check( r ) )
+				{
 					++r; 
+					++pos;
+				}
+			}
+			
+			template< typename range_type >
+			void back( range_type & r ) 
+			{ 
+				if( pos > 0 && r )
+				{
+					--r; 
+					--pos;
+					stopped = stopped ? false : stopped;
+				}
 			}
 			
 			auto valid() -> bool 
 			{ 
-				return !stopped;
+				return !stopped && pos > 0;
+			}
+			
+			template< typename range_type >
+			void goto_end( range_type & r ) 
+			{ 
+				while( pos == 0 || check( r ) )
+					step( r ); 
 			}
 			
 			expression expr;
 			bool stopped;
+			unsigned pos;
 
 	};
 
 	template< typename expression >
-	auto make_taking_while( expression expr ) -> taking_while< expression >
+	auto make_taking_while( const expression & expr ) -> taking_while< expression >
 	{
 		return taking_while< expression >{ expr };
+	}
+
+
+	inline auto skip( unsigned count ) -> decltype( make_factory< partial_range >( skipper( count ) ) )
+	{
+		return make_factory< partial_range >( skipper( count ) );
+	}
+
+	inline auto take( unsigned count ) -> decltype( make_factory< partial_range >( taker( count ) ) )
+	{
+		return make_factory< partial_range >( taker( count ) );
+	}
+
+
+	template< typename expression >
+	auto skip_while( const expression & expr ) -> decltype( make_factory< partial_range >( make_skipping_while( expr ) ) )
+	{
+		return make_factory< partial_range >( make_skipping_while( expr ) );
+	}
+
+	template< typename expression >
+	auto take_while( const expression & expr ) -> decltype( make_factory< partial_range >( make_taking_while( expr ) ) )
+	{
+		return make_factory< partial_range >( make_taking_while( expr ) );
 	}
 
 }

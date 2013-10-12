@@ -44,4 +44,11 @@ namespace narl
 
 	};
 
+
+	template< typename item_type >
+	auto make_range() -> range_generator< item_type >
+	{
+		return range_generator< item_type >{ };
+	}
+
 }

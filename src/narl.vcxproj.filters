@@ -42,11 +42,50 @@
     <ClInclude Include="narl\filtering_range.h">
       <Filter>narl</Filter>
     </ClInclude>
+    <ClInclude Include="narl\range_generator.h">
+      <Filter>narl</Filter>
+    </ClInclude>
+    <ClInclude Include="narl\zipping_range.h">
+      <Filter>narl</Filter>
+    </ClInclude>
+    <ClInclude Include="narl\concatenating_range.h">
+      <Filter>narl</Filter>
+    </ClInclude>
+    <ClInclude Include="narl\diffing_range.h">
+      <Filter>narl</Filter>
+    </ClInclude>
+    <ClInclude Include="narl\grouping_range.h">
+      <Filter>narl</Filter>
+    </ClInclude>
+    <ClInclude Include="narl\intersecting_range.h">
+      <Filter>narl</Filter>
+    </ClInclude>
     <ClInclude Include="narl\partial_range.h">
       <Filter>narl</Filter>
     </ClInclude>
-    <ClInclude Include="narl\range_generator.h">
+    <ClInclude Include="narl\range_accumulate.h">
       <Filter>narl</Filter>
+    </ClInclude>
+    <ClInclude Include="narl\range_predicate.h">
+      <Filter>narl</Filter>
+    </ClInclude>
+    <ClInclude Include="narl\reversed_range.h">
+      <Filter>narl</Filter>
+    </ClInclude>
+    <ClInclude Include="narl\sorted_range.h">
+      <Filter>narl</Filter>
+    </ClInclude>
+    <ClInclude Include="narl\unioning_range.h">
+      <Filter>narl</Filter>
+    </ClInclude>
+    <ClInclude Include="narl\range.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="narl\distinct_range.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="narl\joined_range.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -62,10 +101,49 @@
     <ClCompile Include="tests\testnarl\test_filtering_range.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="tests\testnarl\test_range_generator.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="tests\testnarl\test_iterable_range.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="tests\testnarl\test_partial_range.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="tests\testnarl\test_range_generator.cpp">
+    <ClCompile Include="tests\testnarl\test_range_predicate.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="tests\testnarl\test_reversed_range.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="tests\testnarl\test_sorted_range.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="tests\testnarl\test_zipped_range.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="tests\testnarl\test_concatenating_range.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="tests\testnarl\test_diffing_range.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="tests\testnarl\test_intersecting_range.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="tests\testnarl\test_unioning_range.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="tests\testnarl\test_grouping_range.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="tests\testnarl\test_distinct_range.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="tests\testnarl\test_joined_range.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="tests\testnarl\test_range_accumulate.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

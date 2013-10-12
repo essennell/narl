@@ -1,91 +1,90 @@
 #pragma once
 
-#include "iterable_range.h"
+#include "concatenating_range.h"
+#include "diffing_range.h"
+#include "distinct_range.h"
 #include "filtering_range.h"
+#include "grouping_range.h"
+#include "intersecting_range.h"
+#include "iterable_range.h"
+#include "joined_range.h"
 #include "partial_range.h"
+#include "range.h"
+#include "range_accumulate.h"
 #include "range_factory.h"
 #include "range_input_iterator.h"
 #include "range_generator.h"
+#include "range_predicate.h"
+#include "reversed_range.h"
+#include "sorted_range.h"
 #include "transforming_range.h"
+#include "unioning_range.h"
+#include "zipping_range.h"
 
 
 namespace narl
 {
 
-	template< typename container >
-	auto from( const container & src ) 
-		-> iterable_range< typename container::const_iterator, typename container::value_type >
-	{
-		return iterable_range< typename container::const_iterator, typename container::value_type >
-			{ std::begin( src ), std::end( src ) };
-	}
-
-	template< typename value_type, size_t len >
-	auto from( value_type( &array )[ len ] ) 
-		-> iterable_range< const value_type*, value_type >
-	{
-		return iterable_range< const value_type*, value_type >
-			{ array, array + len };
-	}
-
-	template< typename item_type >
-	auto from( std::initializer_list< item_type > src ) 
-		-> iterable_range< typename std::initializer_list< item_type >::const_iterator, item_type >
-	{
-		return iterable_range< typename std::initializer_list< item_type >::const_iterator, item_type >
-			{ std::begin( src ), std::end( src ) };
-	}
-
-	template< typename item_type >
-	auto make_range() -> range_generator< item_type >
-	{
-		return range_generator< item_type >{ };
-	}
-
-
-	template< typename expression >
-	auto select( expression expr ) -> decltype( make_factory< transforming_range >( expr ) )
-	{
-		return make_factory< transforming_range >( expr );
-	}
-
-	
-	template< typename expression >
-	auto where( expression expr ) -> decltype( make_factory< filtering_range >( expr ) )
-	{
-		return make_factory< filtering_range >( expr );
-	}
-
-
-	inline auto skip( unsigned count ) -> decltype( make_factory< partial_range >( skipper( count ) ) )
-	{
-		return make_factory< partial_range >( skipper( count ) );
-	}
-
-	inline auto take( unsigned count ) -> decltype( make_factory< partial_range >( taker( count ) ) )
-	{
-		return make_factory< partial_range >( taker( count ) );
-	}
-
-
-	template< typename expression >
-	auto skip_while( expression expr ) -> decltype( make_factory< partial_range >( make_skipping_while( expr ) ) )
-	{
-		return make_factory< partial_range >( make_skipping_while( expr ) );
-	}
-
-	template< typename expression >
-	auto take_while( expression expr ) -> decltype( make_factory< partial_range >( make_taking_while( expr ) ) )
-	{
-		return make_factory< partial_range >( make_taking_while( expr ) );
-	}
-
-
 	template< typename range_type, typename factory_type >
-	auto operator|( range_type r, factory_type factory )
+	auto operator|( const range_type & r, const factory_type & factory )
 		-> decltype( factory( r ) )
 	{
 		return factory( r );
+	}
+
+
+	template< typename range_type >
+	auto operator|( const range_type & r, const range_0_factory< range_validator > & v ) -> bool
+	{
+		auto result = v( r );
+		return result.value();
+	}
+
+	template< typename range_type, typename argument_type >
+	auto operator|( const range_type & r, const range_2_factory< range_predicate, argument_type > & v ) -> bool
+	{
+		auto result = v( r );
+		return result.value();
+	}
+
+	template< typename range_type, typename argument_type >
+	auto operator|( const range_type & r, const range_2_factory< range_predicate_inverter, argument_type > & v ) -> bool
+	{
+		auto result = v( r );
+		return result.value();
+	}
+#ifndef _MSC_VER
+
+	template< typename range_type, typename argument_type, typename accumulator >
+	auto operator|( const range_type & r, const range_N_factory< range_accumulate, argument_type, accumulator > & v ) -> decltype( v( r ).value() )
+	{
+		auto result = v( r );
+		return result.value();
+	}
+
+#else
+
+	template< typename range_type, typename argument_type, typename accumulator >
+	auto operator|( const range_type & r, const range_3_factory< range_accumulate, argument_type, accumulator > & v ) -> decltype( v( r ).value() )
+	{
+		auto result = v( r );
+		return result.value();
+	}
+
+#endif
+
+	template< typename range_type, typename accumulator >
+	auto operator|( const range_type & r, const range_2_factory< range_default_accumulate, accumulator > & v ) -> decltype( v( r ).value() )
+	{
+		auto result = v( r );
+		return result.value();
+	}
+
+	template< typename range_type >
+	auto operator|( const range_type & r, const range_0_factory< range_counter > & v ) -> decltype( v( r ).value() )
+	{
+		auto result = v( r );
+		return result.value();
 	}
 
 }

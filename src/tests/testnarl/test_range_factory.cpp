@@ -7,6 +7,13 @@ using namespace narl;
 
 
 template< typename R >
+struct dummy_range_0
+{
+	dummy_range_0( R r ) : r{ r } { }
+	R r;
+};
+
+template< typename R >
 struct dummy_range_1
 {
 	dummy_range_1( R r, int n ) : r{ r }, n{ n } { }
@@ -21,6 +28,15 @@ struct dummy_range_2
 	R r;
 	T t;
 };
+
+
+TEST_CASE( "Factory object creates nullary range type", "[narl][range_factory][nullary]" )
+{
+	range_0_factory< dummy_range_0 > factory{};
+	auto result = factory( 2 );
+
+	REQUIRE( result.r == 2 );
+}
 
 
 TEST_CASE( "Factory object creates unary range type with provided expression", "[narl][range_factory][unary]" )

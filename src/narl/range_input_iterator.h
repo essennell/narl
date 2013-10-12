@@ -47,13 +47,13 @@ namespace narl
 
 
 	template< typename range_type >
-	auto begin( range_type r ) -> range_input_iterator< range_type, decltype( *r ) >
+	auto begin( const range_type & r ) -> range_input_iterator< range_type, decltype( *r ) >
 	{
 		return range_input_iterator< range_type, decltype( *r ) >{ r };
 	}
 
 	template< typename range_type >
-	auto end( range_type r ) -> range_input_iterator< range_type, decltype( *r ) >
+	auto end( const range_type & r ) -> range_input_iterator< range_type, decltype( *r ) >
 	{
 		return range_input_iterator< range_type, decltype( *r ) >{ r };
 	}
