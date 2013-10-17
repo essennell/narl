@@ -87,6 +87,21 @@
     <ClInclude Include="narl\joined_range.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="narl\selectmany_range.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="narl\merging_range.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="narl\range_tocontainer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="narl\zipping_range_non_variadic.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="narl\zipping_range_variadic.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="tests\testnarl\test_range_factory.cpp">
@@ -144,6 +159,18 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="tests\testnarl\test_range_accumulate.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="tests\testnarl\test_selectmany_range.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="tests\testnarl\narl_stl.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="tests\testnarl\test_merging_range.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="tests\testnarl\test_tocontainer_range.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

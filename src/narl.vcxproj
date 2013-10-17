@@ -83,6 +83,7 @@
     <ClInclude Include="narl\intersecting_range.h" />
     <ClInclude Include="narl\iterable_range.h" />
     <ClInclude Include="narl\joined_range.h" />
+    <ClInclude Include="narl\merging_range.h" />
     <ClInclude Include="narl\narl.h" />
     <ClInclude Include="narl\partial_range.h" />
     <ClInclude Include="narl\range.h" />
@@ -91,15 +92,20 @@
     <ClInclude Include="narl\range_generator.h" />
     <ClInclude Include="narl\range_input_iterator.h" />
     <ClInclude Include="narl\range_predicate.h" />
+    <ClInclude Include="narl\range_tocontainer.h" />
     <ClInclude Include="narl\reversed_range.h" />
+    <ClInclude Include="narl\selectmany_range.h" />
     <ClInclude Include="narl\sorted_range.h" />
     <ClInclude Include="narl\transforming_range.h" />
     <ClInclude Include="narl\unioning_range.h" />
     <ClInclude Include="narl\zipping_range.h" />
+    <ClInclude Include="narl\zipping_range_non_variadic.h" />
+    <ClInclude Include="narl\zipping_range_variadic.h" />
     <ClInclude Include="tests\testnarl\testnarl.h" />
     <ClInclude Include="tests\testnarl\throwing_range.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="tests\testnarl\narl_stl.cpp" />
     <ClCompile Include="tests\testnarl\testnarl.cpp" />
     <ClCompile Include="tests\testnarl\test_concatenating_range.cpp" />
     <ClCompile Include="tests\testnarl\test_diffing_range.cpp" />
@@ -109,13 +115,16 @@
     <ClCompile Include="tests\testnarl\test_intersecting_range.cpp" />
     <ClCompile Include="tests\testnarl\test_iterable_range.cpp" />
     <ClCompile Include="tests\testnarl\test_joined_range.cpp" />
+    <ClCompile Include="tests\testnarl\test_merging_range.cpp" />
     <ClCompile Include="tests\testnarl\test_partial_range.cpp" />
     <ClCompile Include="tests\testnarl\test_range_accumulate.cpp" />
     <ClCompile Include="tests\testnarl\test_range_factory.cpp" />
     <ClCompile Include="tests\testnarl\test_range_generator.cpp" />
     <ClCompile Include="tests\testnarl\test_range_predicate.cpp" />
     <ClCompile Include="tests\testnarl\test_reversed_range.cpp" />
+    <ClCompile Include="tests\testnarl\test_selectmany_range.cpp" />
     <ClCompile Include="tests\testnarl\test_sorted_range.cpp" />
+    <ClCompile Include="tests\testnarl\test_tocontainer_range.cpp" />
     <ClCompile Include="tests\testnarl\test_transforming_range.cpp" />
     <ClCompile Include="tests\testnarl\test_unioning_range.cpp" />
     <ClCompile Include="tests\testnarl\test_zipped_range.cpp" />

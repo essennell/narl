@@ -11,14 +11,19 @@ SRCDIR=tests/testnarl
 # * distinct
 # * except
 # * groupby
+# * join
 # * intersect
+# * range
 # * reverse
 # * select
+# * selectmany
+# * sequenceequal
 # * skip
 # * skipwhile
 # * sorted
 # * take
 # * takewhile
+# * to...
 # * union
 # * where
 # * zip
@@ -36,11 +41,7 @@ SRCDIR=tests/testnarl
 # - sum ( aggregate )
 # - contains ( same as any( predicatee ) )
 # groupjoin
-# * join
 # last
-# range
-# selectmany
-# sequenceequal
 # single
 
 OBJS=	$(OBJDIR)/testnarl.o \
@@ -52,16 +53,20 @@ OBJS=	$(OBJDIR)/testnarl.o \
 		$(OBJDIR)/test_intersecting_range.o \
 		$(OBJDIR)/test_iterable_range.o \
 		$(OBJDIR)/test_joined_range.o \
+		$(OBJDIR)/test_merging_range.o \
 		$(OBJDIR)/test_partial_range.o \
 		$(OBJDIR)/test_range_accumulate.o \
 		$(OBJDIR)/test_range_factory.o \
 		$(OBJDIR)/test_range_generator.o \
 		$(OBJDIR)/test_range_predicate.o \
 		$(OBJDIR)/test_reversed_range.o \
+		$(OBJDIR)/test_selectmany_range.o \
 		$(OBJDIR)/test_sorted_range.o \
+		$(OBJDIR)/test_tocontainer_range.o \
 		$(OBJDIR)/test_transforming_range.o \
 		$(OBJDIR)/test_unioning_range.o \
 		$(OBJDIR)/test_zipped_range.o \
+		$(OBJDIR)/narl_stl.o \
 
 CPPFLAGS=-std=c++11 -Wall -Wextra -Wpedantic
 CC=g++ 

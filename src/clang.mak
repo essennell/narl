@@ -6,20 +6,26 @@ SRCDIR=tests/testnarl
 OBJS=	$(OBJDIR)/testnarl.oclang \
 		$(OBJDIR)/test_concatenating_range.oclang \
 		$(OBJDIR)/test_diffing_range.oclang \
+		$(OBJDIR)/test_distinct_range.oclang \
 		$(OBJDIR)/test_filtering_range.oclang \
 		$(OBJDIR)/test_grouping_range.oclang \
 		$(OBJDIR)/test_intersecting_range.oclang \
 		$(OBJDIR)/test_iterable_range.oclang \
+		$(OBJDIR)/test_joined_range.oclang \
+		$(OBJDIR)/test_merging_range.oclang \
 		$(OBJDIR)/test_partial_range.oclang \
 		$(OBJDIR)/test_range_accumulate.oclang \
 		$(OBJDIR)/test_range_factory.oclang \
 		$(OBJDIR)/test_range_generator.oclang \
 		$(OBJDIR)/test_range_predicate.oclang \
 		$(OBJDIR)/test_reversed_range.oclang \
+		$(OBJDIR)/test_selectmany_range.oclang \
 		$(OBJDIR)/test_sorted_range.oclang \
+		$(OBJDIR)/test_tocontainer_range.oclang \
 		$(OBJDIR)/test_transforming_range.oclang \
 		$(OBJDIR)/test_unioning_range.oclang \
 		$(OBJDIR)/test_zipped_range.oclang \
+		$(OBJDIR)/narl_stl.oclang \
 
 CPPFLAGS=-std=c++11 -Wall -Wextra -Wpedantic
 CC=clang++ 
