@@ -2,6 +2,7 @@
 *.out
 *.exe
 *.sdf
+*.opensdf
 *.suo
 *.user
 Debug/
