@@ -400,7 +400,7 @@ TEST_CASE( "Joining range can be incremented and valid from before begin", "[nar
 	REQUIRE( !!r );
 }
 
-
+#ifndef _MSC_VER
 
 TEST_CASE( "Joined range can produce a different result type from 2 inputs", "[narl][joined_range][differenttypes]" )
 {
@@ -424,4 +424,4 @@ TEST_CASE( "Joined range can produce a different result type from 2 inputs", "[n
 	REQUIRE( ( *r ).i == 4 );
 }
 
-
+#endif

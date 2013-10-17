@@ -165,7 +165,7 @@ TEST_CASE( "Distinct range skips all duplicates in reverse", "[narl][distinct][d
 
 TEST_CASE( "Distinct range can use supplied comparer", "[narl][distinct][customcomparer]" )
 {
-	auto r = make_test_range< distinct_range >( from( { 5, 4, 3, 3, 3, 1 } ), []( int l, int r ) { return l > r; } );
+	auto r = make_test_range< distinct_range >( from( { 5, 4, 3, 3, 3, 1 } ), []( int l, int r ) { return l == r; } );
 
 	REQUIRE( *r++ == 5 );
 	REQUIRE( *r++ == 4 );

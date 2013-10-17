@@ -6,11 +6,35 @@
 #include <narl.h>
 
 #include <array>
+#include <list>
 #include <string>
 #include <vector>
 
 
 using namespace narl;
+
+
+TEST_CASE( "Default constructed range is invalid", "[narl][range][default][invalid]" )
+{
+	iterable_range< std::vector< int >::const_iterator, int > r;
+	REQUIRE( !r );
+}
+
+
+TEST_CASE( "Default constructed range is invalid after increment", "[narl][range][default][invalid][increment]" )
+{
+	iterable_range< std::vector< int >::const_iterator, int > r;
+	++r;
+	REQUIRE( !r );
+}
+
+
+TEST_CASE( "Default constructed range is invalid after decrement", "[narl][range][default][invalid][decrement]" )
+{
+	iterable_range< std::vector< int >::const_iterator, int > r;
+	--r;
+	REQUIRE( !r );
+}
 
 
 TEST_CASE( "Range operates with range-based for", "[narl][range_for]" )
@@ -81,6 +105,17 @@ TEST_CASE( "Range generated produces an incrementing range for int", "[narl][gen
 	REQUIRE( *r++ == 4 );
 
 	REQUIRE( !!r );
+}
+
+
+TEST_CASE( "Range can be generated with callback", "[narl][generate][callback]" )
+{
+	auto r = make_range< int >( 1, []( int i ) { return i * 2; } );
+	REQUIRE( *r++ == 1 );
+	REQUIRE( *r++ == 2 );
+	REQUIRE( *r++ == 4 );
+	REQUIRE( *r++ == 8 );
+	REQUIRE( *r++ == 16 );
 }
 
 
@@ -365,6 +400,27 @@ TEST_CASE( "All returns true for range with no elements", "[narl][all][true][emp
 }
 
 
+TEST_CASE( "Sequence equal is false if ranges mismatch", "[narl][sequence_equal][mismatch]" )
+{
+	auto result = from( { 1, 5, 3, 0 } ) | sequence_equal( from( { 0, 1, 3, 5 } ) );
+	REQUIRE( !result );
+}
+
+
+TEST_CASE( "Sequence equal is true if ranges match", "[narl][sequence_equal][match]" )
+{
+	auto result = from( { 1, 5, 3, 0 } ) | sorted() | sequence_equal( from( { 0, 1, 3, 5 } ) );
+	REQUIRE( !!result );
+}
+
+
+TEST_CASE( "Sequence equal can be given a custom comparer", "[narl][sequence_equal][customcmp]" )
+{
+	auto result = from( { 1, 2, 3 } ) | sequence_equal( from( { 2, 4, 6 } ), []( int l, int r ) { return r == l * 2; } );
+	REQUIRE( !!result );
+}
+
+
 TEST_CASE( "Concat produces 2 ranges", "[narl][concat]" )
 {
 	auto r = from( { 1, 2 } ) | concat( from( { 3, 4 } ) );
@@ -389,11 +445,12 @@ TEST_CASE( "Concat can be reversed", "[narl][concat][reverse]" )
 }
 
 
-TEST_CASE( "Except produces unique set of all results not in second range", "[narl][except]" )
+TEST_CASE( "Except produces set of all results not in second range", "[narl][except]" )
 {
 	auto r = from( { 1, 2, 2, 3, 4, 5 } ) | except( from( { 3, 4, 4 } ) );
 
 	REQUIRE( *r++ == 1 );
+	REQUIRE( *r++ == 2 );
 	REQUIRE( *r++ == 2 );
 	REQUIRE( *r++ == 5 );
 	REQUIRE( !r );
@@ -405,6 +462,7 @@ TEST_CASE( "Reversed except produces reversed list of all results not in second 
 	auto r = from( { 1, 2, 2, 3, 4, 5 } ) | except( from( { 3, 4, 4 } ) ) | reverse();
 
 	REQUIRE( *r++ == 5 );
+	REQUIRE( *r++ == 2 );
 	REQUIRE( *r++ == 2 );
 	REQUIRE( *r++ == 1 );
 	REQUIRE( !r );
@@ -440,6 +498,7 @@ TEST_CASE( "Except can be used with custom comparer", "[narl][except][comparer]"
 	auto r = from( { 5, 4, 3, 2, 2, 1 } ) | except( from( { 4, 4, 3 } ), []( int l, int r ) { return l > r; } );
 
 	REQUIRE( *r++ == 5 );
+	REQUIRE( *r++ == 2 );
 	REQUIRE( *r++ == 2 );
 	REQUIRE( *r++ == 1 );
 	REQUIRE( !r );
@@ -480,12 +539,14 @@ TEST_CASE( "Intersect operates with custom comparer", "[narl][intersect][compare
 }
 
 
-TEST_CASE( "Union produces unique set of all results", "[narl][union]" )
+TEST_CASE( "Union produces set of all results", "[narl][union]" )
 {
 	auto r = from( { 1, 2, 2, 3, 4, 5 } ) | union_with( from( { 2, 3, 3, 4, 5 } ) );
 
 	REQUIRE( *r++ == 1 );
 	REQUIRE( *r++ == 2 );
+	REQUIRE( *r++ == 2 );
+	REQUIRE( *r++ == 3 );
 	REQUIRE( *r++ == 3 );
 	REQUIRE( *r++ == 4 );
 	REQUIRE( *r++ == 5 );
@@ -500,6 +561,8 @@ TEST_CASE( "Union operates with custom comparer", "[narl][union][comparer]" )
 	REQUIRE( *r++ == 5 );
 	REQUIRE( *r++ == 4 );
 	REQUIRE( *r++ == 3 );
+	REQUIRE( *r++ == 3 );
+	REQUIRE( *r++ == 2 );
 	REQUIRE( *r++ == 2 );
 	REQUIRE( *r++ == 1 );
 	REQUIRE( !r );
@@ -513,6 +576,8 @@ TEST_CASE( "Reversed union produces reversed list of matched results", "[narl][u
 	REQUIRE( *r++ == 5 );
 	REQUIRE( *r++ == 4 );
 	REQUIRE( *r++ == 3 );
+	REQUIRE( *r++ == 3 );
+	REQUIRE( *r++ == 2 );
 	REQUIRE( *r++ == 2 );
 	REQUIRE( *r++ == 1 );
 	REQUIRE( !r );
@@ -539,8 +604,6 @@ TEST_CASE( "Groupby produces range grouped by key", "[narl][groupby]" )
 }
 
 
-#ifndef _MSC_VER2
-
 TEST_CASE( "Zipwith single rhs returns tuple of 2 items", "[narl][zipwith][2]" )
 {
 	auto r = from( { 1, 2, 3 } ) | zipwith( from( { 10, 20, 30 } ) );
@@ -555,6 +618,7 @@ TEST_CASE( "Zipwith single rhs returns tuple of 2 items", "[narl][zipwith][2]" )
 	REQUIRE( !r );
 }
 
+#ifndef _MSC_VER
 
 TEST_CASE( "Zipwith two rhs returns tuple of 3 items", "[narl][zipwith][3]" )
 {
@@ -658,8 +722,36 @@ TEST_CASE( "Distinct range can be reversed", "[narl][distinct][reverse]" )
 }
 
 
+TEST_CASE( "Ranges can be joined to produce new types", "[narl][join]" )
+{
+	auto r1 = from( { 0, 1, 2, 3, 4 } ) | zipwith( from( { "Zero", "One", "Two", "Three", "Four" } ) );
+	auto r2 = from( { 1, 2, 3, 4, 5 } ) | zipwith( from( { 10.1, 20.2, 30.3, 40.4, 50.5 } ) ) ;
 
-/*
+	//typedef std::tuple< int, std::string > left;
+	//typedef std::tuple< int, double > right;
+	//typedef std::tuple< int, std::string, double > result;
+
+	//auto r = r1 | join( r2, 
+	//	[]( const left & l ) { return std::get< 0 >( l ); }, 
+	//	[]( const right & r ) { return std::get< 0 >( r ); }, 
+	//	[]( const left & l, const right & r ) 
+	//		{ return std::make_tuple( std::get< 0 >( l ), std::get< 1 >( l ), std::get< 1 >( r ) ); } );
+
+	//std::vector< result > expected
+	//	{
+	//		std::make_tuple( 1, "One", 10.1 ),
+	//		std::make_tuple( 2, "Two", 20.2 ),
+	//		std::make_tuple( 3, "Three", 30.3 ),
+	//		std::make_tuple( 4, "Four", 40.4 ),
+	//	};
+	//for( const auto & v : expected )
+	//{
+	//	REQUIRE( v == *r++ );
+	//}
+	//REQUIRE( !r );
+}
+
+
 TEST_CASE( "Range can be used as default constructed local", "[narl][range][local]" )
 {
 	range< int > r;
@@ -674,4 +766,76 @@ TEST_CASE( "Range can be used as default constructed local", "[narl][range][loca
 	REQUIRE( !r );
 }
 
-*/
+#ifndef _MSC_VER
+
+TEST_CASE( "Range can be assigned to expression range", "[narl][range][local][expression]" )
+{
+	range< int > r;
+	auto src = from( { 1, 2, 3, 4, 5 } ) | where( []( int i ) { return i <= 3; } ) | reverse();
+
+	r = src;
+
+	REQUIRE( !!r );
+	REQUIRE( *r++ == 3 );
+	REQUIRE( *r++ == 2 );
+	REQUIRE( *r++ == 1 );
+	REQUIRE( !r );
+}
+
+TEST_CASE( "Range can participate in further expressions", "[narl][range][local][source]" )
+{
+	range< int > tmp;
+	auto src = from( { 1, 2, 3, 4, 5 } ) | where( []( int i ) { return i >= 3; } );
+
+	tmp = src;
+
+	auto r = tmp | select( []( int i ) { return i * 2; } ) | reverse();
+
+	REQUIRE( !!r );
+	REQUIRE( *r++ == 10 );
+	REQUIRE( *r++ == 8 );
+	REQUIRE( *r++ == 6 );
+	REQUIRE( !r );
+}
+
+#endif
+
+
+TEST_CASE( "Range can be copied and re-assigned to other range", "[narl][range][copy][assign]" )
+{
+	range< int > r1 = from( { 1, 2, 3 } );
+	range< int > r2 = r1;
+
+	REQUIRE( *r1 == *r2++ );
+	REQUIRE( *r1 != *r2 );
+	r2 = range< int >{};
+	REQUIRE( !r2 );
+	REQUIRE( !!r1 );
+}
+
+
+TEST_CASE( "Range can be used to create a list", "[narl][range][container][list]" )
+{
+	std::vector< int > src { 1, 2, 3 };
+	auto r = from( src );
+
+	auto v = r | to< std::list >();
+
+	REQUIRE( std::equal( std::begin( src ), std::end( src ), std::begin( v ) ) );
+}
+
+
+TEST_CASE( "Merge produces a sorted range from 2 input ranges", "[narl][merge]" )
+{
+	auto r = from( { 1, 2, 3 } ) | merge_with( from( { 0, 2, 4 } ) );
+
+	REQUIRE( *r++ == 0 );
+	REQUIRE( *r++ == 1 );
+	REQUIRE( *r++ == 2 );
+	REQUIRE( *r++ == 2 );
+	REQUIRE( *r++ == 3 );
+	REQUIRE( *r++ == 4 );
+	REQUIRE( !r );
+}
+
+

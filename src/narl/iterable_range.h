@@ -14,8 +14,27 @@ namespace narl
 	{
 
 		public:
+			iterable_range()
+				: before_begin{ true }
+#ifdef _MSC_VER
+			, invalid{ true }
+#endif
+			{
+			}
+
+			iterable_range( const iterable_range & other )
+				: startpos{ other.startpos }, endpos{ other.endpos }, pos{ other.pos }, before_begin{ other.before_begin }
+#ifdef _MSC_VER
+			, invalid{ other.invalid }
+#endif
+			{
+			}
+
 			iterable_range( iterator_type startpos, iterator_type endpos )
 				: startpos{ startpos }, endpos{ endpos }, pos{ startpos }, before_begin{ false }
+#ifdef _MSC_VER
+			, invalid{ false }
+#endif
 			{
 			}
 			
@@ -29,6 +48,9 @@ namespace narl
 
 			auto operator++() -> iterable_range &
 			{
+#ifdef _MSC_VER
+				if( !invalid )
+#endif
 				if( pos != endpos )
 				{
 					if( before_begin )
@@ -48,6 +70,9 @@ namespace narl
 
 			auto operator--() -> iterable_range &
 			{
+#ifdef _MSC_VER
+				if( !invalid )
+#endif
 				if( ! before_begin )
 				{
 					if( pos == startpos )
@@ -72,7 +97,10 @@ namespace narl
 			
 			explicit operator bool() const 
 			{
-				return pos != endpos && !before_begin;
+#ifdef _MSC_VER
+				if( invalid ) return false;
+#endif
+				return !before_begin && pos != endpos;
 			}
 
 
@@ -80,7 +108,9 @@ namespace narl
 			iterator_type startpos, endpos;
 			iterator_type pos;
 			bool before_begin;
-
+#ifdef _MSC_VER
+			bool invalid;
+#endif
 	};
 
 
@@ -148,6 +178,12 @@ namespace narl
 			void goto_end()
 			{
 				pos = std::end( *src );
+			}
+
+
+			operator iterable_range< typename std::vector< value_type >::const_iterator, value_type >() const
+			{
+				return iterable_range< typename std::vector< value_type >::const_iterator, value_type >( pos, std::end( *src ) );
 			}
 
 

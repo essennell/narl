@@ -16,13 +16,13 @@ namespace narl
 			}
 
 			range( const range & other )
-				: r{ other.r }
+				: r{ other.r ? other.r->clone() : nullptr }
 			{
 			}
 
 			template< typename range_type >
 			range( const range_type & other )
-				: r{ std::make_shared< range_wrapper< range_type > >( other ) }
+				: r{ std::unique_ptr< range_wrapper< range_type > >{ new range_wrapper< range_type >{ other } } }
 			{
 			}
 
@@ -30,6 +30,13 @@ namespace narl
 			auto operator=( const range_type & other ) -> range &
 			{
 				range tmp{ other };
+				tmp.r.swap( r );
+				return *this;
+			}
+
+			auto operator=( const range & other ) -> range &
+			{
+				range tmp { other };
 				tmp.r.swap( r );
 				return *this;
 			}
@@ -82,11 +89,12 @@ namespace narl
 			class range_adapter
 			{
 				public:
-				virtual value_type current() const = 0;
-				virtual void next() = 0;
-				virtual void previous() = 0;
-				virtual bool valid() const = 0;
-				virtual void goto_end() = 0;
+					virtual std::unique_ptr< range_adapter > clone() const = 0;
+					virtual value_type current() const = 0;
+					virtual void next() = 0;
+					virtual void previous() = 0;
+					virtual bool valid() const = 0;
+					virtual void goto_end() = 0;
 			};
 
 			template< typename range_type >
@@ -96,6 +104,11 @@ namespace narl
 				range_wrapper( const range_type & r )
 					: r{ r }
 				{
+				}
+
+				virtual std::unique_ptr< range_adapter > clone() const override
+				{
+					return std::unique_ptr< range_adapter >{ new range_wrapper< range_type >( r ) };
 				}
 
 				virtual value_type current() const
@@ -122,7 +135,7 @@ namespace narl
 				range_type r;
 			};
 
-			std::shared_ptr< range_adapter > r;
+			std::unique_ptr< range_adapter > r;
 
 	};
 

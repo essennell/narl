@@ -1,8 +1,11 @@
 #pragma once
 
-#include <filtering_range.h>
-#include <iterable_range.h>
-#include <range_factory.h>
+#include "filtering_range.h"
+#include "iterable_range.h"
+#include "range_factory.h"
+
+#include <functional>
+#include <type_traits>
 
 
 namespace narl
@@ -29,6 +32,50 @@ namespace narl
 			filtering_range< range_type, expression > r;
 
 	};
+
+
+	template< typename range_type, typename other_range_type, typename comparitor >
+	class range_equality
+	{
+
+		public:
+			range_equality( const range_type & r, const other_range_type & o, const comparitor & cmp )
+				: r{ r }, o{ o }, cmp( cmp )
+			{
+			}
+
+
+			auto value() const -> bool
+			{
+				while( r && o && cmp( *r, *o ) )
+				{
+					++r; 
+					++o;
+				}
+				return !r && !o;
+			}
+
+
+		private:
+			mutable range_type r;
+			mutable other_range_type o;
+			comparitor cmp;
+
+	};
+
+	
+	template< typename range_type, typename other_range_type >
+	class range_equality_default : public range_equality< range_type, other_range_type, std::equal_to< decltype( *std::declval< range_type >() ) > >
+	{
+
+		public:
+			range_equality_default( const range_type & r, const other_range_type & o )
+				: range_equality< range_type, other_range_type, std::equal_to< decltype( *r ) > >( r, o, std::equal_to< decltype( *r ) >() )
+			{
+			}
+
+	};
+
 
 	template< typename range_type >
 	class range_validator
@@ -98,6 +145,20 @@ namespace narl
 		return make_factory< range_predicate >( expr );
 	}
 	
+	template< typename other_range_type, typename comparitor >
+	auto sequence_equal( const other_range_type & o, const comparitor & cmp )
+		-> decltype( make_factory< range_equality >( o, cmp ) )
+	{
+		return make_factory< range_equality >( o, cmp );
+	}
+
+	template< typename other_range_type >
+	auto sequence_equal( const other_range_type & o )
+		-> decltype( make_factory< range_equality_default >( o ) )
+	{
+		return make_factory< range_equality_default >( o );
+	}
+
 	template< typename expression >
 	auto all( const expression & expr ) -> decltype( make_factory< range_predicate_inverter >( expr ) )
 	{

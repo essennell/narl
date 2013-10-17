@@ -19,6 +19,7 @@ TEST_CASE( "Zipping range of 2 is evaluated lazily", "[narl][zipped][lazy][2]" )
 	REQUIRE_THROWS_AS( ( !r ), range_access_exception );
 }
 
+#ifndef _MSC_VER
 
 TEST_CASE( "Zipping range of 3 is evaluated lazily", "[narl][zipped][lazy][3]" )
 {
@@ -41,6 +42,7 @@ TEST_CASE( "Zipping range of 4 is evaluated lazily", "[narl][zipped][lazy][4]" )
 	REQUIRE_THROWS_AS( ( !r ), range_access_exception );
 }
 
+#endif
 
 TEST_CASE( "Zipping range of 2 produces tuple of each element in turn", "[narl][zipped][2]" )
 {
@@ -112,6 +114,7 @@ TEST_CASE( "Zipping range of 2 with different lengths is invalid at end of short
 	REQUIRE( !r );
 }
 
+#ifndef _MSC_VER
 
 TEST_CASE( "Zipping range of 3 produces tuple of each element in turn", "[narl][zipped][3]" )
 {
@@ -196,5 +199,5 @@ TEST_CASE( "Zipping range of 3 with different lengths is invalid at end of short
 	REQUIRE( !r );
 }
 
-
+#endif
 

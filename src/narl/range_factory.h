@@ -104,7 +104,7 @@ namespace narl
 
 		public:
 			range_N_factory( const next_type & next, const others &... rest )
-				: base{ rest... }, next{ next }
+				: base{ rest... }, next( next )
 			{
 			}
 
@@ -145,7 +145,16 @@ namespace narl
 		return range_2_factory< range_type, argument_type >{ arg };
 	}
 
-#ifdef _MSC_VER
+#ifndef _MSC_VER
+
+	template< template< typename... > class range_type, typename next_type, typename... argument_type >
+	auto make_factory( const next_type & arg, const argument_type &... expr )
+		-> range_N_factory< range_type, next_type, argument_type... >
+	{
+		return range_N_factory< range_type, next_type, argument_type... >{ arg, expr... };
+	}
+
+#else
 
 	template< template< typename, typename, typename > class range_type, typename other_range_type, typename argument_type >
 	class range_3_factory
@@ -178,13 +187,39 @@ namespace narl
 		return range_3_factory< range_type, other_range_type, argument_type >{ o, arg };
 	}
 
-#endif
-
-	template< template< typename... > class range_type, typename next_type, typename... argument_type >
-	auto make_factory( const next_type & arg, const argument_type &... expr )
-		-> range_N_factory< range_type, next_type, argument_type... >
+	template< template< typename, typename, typename, typename, typename > class range_type, typename other_range_type, typename arg1_t, typename arg2_t, typename arg3_t >
+	class range_5_factory
 	{
-		return range_N_factory< range_type, next_type, argument_type... >{ arg, expr... };
+
+		public:
+			range_5_factory( const other_range_type & o, const arg1_t & arg1, const arg2_t & arg2, const arg3_t & arg3 )
+				: o( o ), arg1( arg1 ), arg2( arg2 ), arg3( arg3 )
+			{
+			}
+
+
+			template< typename range_of >
+			auto operator()( const range_of & r ) const -> range_type< range_of, other_range_type, arg1_t, arg2_t, arg3_t >
+			{
+				return range_type< range_of, other_range_type, arg1_t, arg2_t, arg3_t >{ r, o, arg1, arg2, arg3 };
+			}
+
+
+		private:
+			other_range_type o;
+			arg1_t arg1;
+			arg2_t arg2;
+			arg3_t arg3;
+
+	};
+
+	template< template< typename, typename, typename, typename, typename > class range_type, typename other_range_type, typename arg1_t, typename arg2_t, typename arg3_t >
+	auto make_factory( const other_range_type & o, const arg1_t & arg1, const arg2_t & arg2, const arg3_t & arg3 )
+		-> range_5_factory< range_type, other_range_type, arg1_t, arg2_t, arg3_t >
+	{
+		return range_5_factory< range_type, other_range_type, arg1_t, arg2_t, arg3_t >{ o, arg1, arg2, arg3 };
 	}
+
+#endif
 
 }

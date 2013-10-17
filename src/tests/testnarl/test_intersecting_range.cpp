@@ -25,8 +25,6 @@ TEST_CASE( "Intersecting range is lazy evaluated", "[narl][intersecting_range][l
 	REQUIRE_THROWS_AS( ++r2, range_access_exception );
 	REQUIRE_THROWS_AS( --r2, range_access_exception );
 	REQUIRE_THROWS_AS( r2++, range_access_exception );
-	REQUIRE_THROWS_AS( *r2, range_access_exception );
-	REQUIRE_THROWS_AS( !r2, range_access_exception );
 	REQUIRE_THROWS_AS( r2.goto_end(), range_access_exception );
 }
 
@@ -148,14 +146,18 @@ TEST_CASE( "Intersecting range removes duplicates in left from output", "[narl][
 }
 
 
-TEST_CASE( "Intersecting range removes multiple symmetrical duplicates from output", "[narl][intersecting_range][dedupe][symmetrical][multiple]" )
+TEST_CASE( "Intersecting range keeps multiple symmetrical duplicates from output", "[narl][intersecting_range][dedupe][symmetrical][multiple]" )
 {
 	auto r = make_test_range< intersecting_range_default >( 
 		from( { 1, 1, 1, 2, 3, 3, 3 } ), 
 		from( { 1, 1, 1, 2, 3, 3, 3 } ) );
 
 	REQUIRE( *r++ == 1 );
+	REQUIRE( *r++ == 1 );
+	REQUIRE( *r++ == 1 );
 	REQUIRE( *r++ == 2 );
+	REQUIRE( *r++ == 3 );
+	REQUIRE( *r++ == 3 );
 	REQUIRE( *r++ == 3 );
 	REQUIRE( !r );
 }
@@ -226,14 +228,16 @@ TEST_CASE( "Intersecting range removes multiple duplicates from output", "[narl]
 }
 
 
-TEST_CASE( "Intersecting range removes symmetrical duplicates from output", "[narl][intersecting_range][dedupe][symmetrica]" )
+TEST_CASE( "Intersecting range keeps symmetrical duplicates from output", "[narl][intersecting_range][dedupe][symmetrica]" )
 {
 	auto r = make_test_range< intersecting_range_default >( 
 		from( { 1, 1, 2, 3, 3 } ), 
 		from( { 1, 1, 2, 3, 3 } ) );
 
 	REQUIRE( *r++ == 1 );
+	REQUIRE( *r++ == 1 );
 	REQUIRE( *r++ == 2 );
+	REQUIRE( *r++ == 3 );
 	REQUIRE( *r++ == 3 );
 	REQUIRE( !r );
 }
@@ -389,7 +393,9 @@ TEST_CASE( "Intersecting range removes symmetrical duplicates from output in rev
 	r.goto_end();
 
 	REQUIRE( *--r == 3 );
+	REQUIRE( *--r == 3 );
 	REQUIRE( *--r == 2 );
+	REQUIRE( *--r == 1 );
 	REQUIRE( *--r == 1 );
 	REQUIRE( !--r );
 }
@@ -403,7 +409,11 @@ TEST_CASE( "Intersecting range removes multiple symmetrical duplicates from outp
 	r.goto_end();
 
 	REQUIRE( *--r == 3 );
+	REQUIRE( *--r == 3 );
+	REQUIRE( *--r == 3 );
 	REQUIRE( *--r == 2 );
+	REQUIRE( *--r == 1 );
+	REQUIRE( *--r == 1 );
 	REQUIRE( *--r == 1 );
 	REQUIRE( !--r );
 }

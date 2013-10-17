@@ -1,3 +1,5 @@
+#include "testnarl.h"
+
 #include <range_factory.h>
 #include <range_generator.h>
 
@@ -58,6 +60,15 @@ TEST_CASE( "Range generator from user type produces correct type on dereference"
 {
 	auto r = range_generator< generator >{};
 	REQUIRE( ( std::is_same< decltype( *r ), generator >() ) );
+}
+
+
+TEST_CASE( "Range generator accepts a callback for values", "[narl][range_generator][userdef][callback]" )
+{
+	auto r = make_test_range< range_generator_callback >( 0, []( int i ) { return i + 1; } );
+	REQUIRE( *r++ == 0 );
+	REQUIRE( *r++ == 1 );
+	REQUIRE( *r++ == 2 );
 }
 
 

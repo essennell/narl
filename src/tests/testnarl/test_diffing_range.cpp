@@ -90,30 +90,68 @@ TEST_CASE( "Diffing range is invalid after last mismatch when last is mismatch",
 
 TEST_CASE( "Diffing range finds all mismatches", "[narl][diffing_range][all]" )
 {
-	auto r = make_test_range< diffing_range_default >( from( { 1, 2, 3, 4, 5 } ), from( { 1, 3, 5 } ) );
+	auto r = make_test_range< diffing_range_default >( from( { 1, 2, 3, 4, 5 } ), from( { 0, 2, 4 } ) );
 
-	REQUIRE( *r++ == 2 );
-	REQUIRE( *r++ == 4 );
+	REQUIRE( *r++ == 1 );
+	REQUIRE( *r++ == 3 );
+	REQUIRE( *r++ == 5 );
 	REQUIRE( !r );
 }
 
 
-TEST_CASE( "Diffing range skips duplicates in mismatches", "[narl][diffing_range][dedupe]" )
+TEST_CASE( "Diffing range finds all mismatches in longer rhs", "[narl][diffing_range][all][rhslonger]" )
+{
+	auto r = make_test_range< diffing_range_default >( from( { 0, 2, 4, 6 } ), from( { 1, 2, 3, 4, 5 } ) );
+
+	REQUIRE( *r++ == 0 );
+	REQUIRE( *r++ == 6 );
+	REQUIRE( !r );
+}
+
+
+TEST_CASE( "Diffing range keeps duplicates in mismatches", "[narl][diffing_range][dedupe]" )
 {
 	auto r = make_test_range< diffing_range_default >( from( { 1, 2, 2, 3, 4, 5 } ), from( { 1, 3, 5 } ) );
 
 	REQUIRE( *r++ == 2 );
+	REQUIRE( *r++ == 2 );
 	REQUIRE( *r++ == 4 );
 	REQUIRE( !r );
 }
 
 
-TEST_CASE( "Diffing range skips multiple duplicates in mismatches", "[narl][diffing_range][dedupe][multiple]" )
+TEST_CASE( "Diffing range keeps multiple duplicates in mismatches", "[narl][diffing_range][dedupe][multiple]" )
 {
 	auto r = make_test_range< diffing_range_default >( from( { 1, 2, 2, 2, 2, 3, 4, 5 } ), from( { 1, 3, 5 } ) );
 
 	REQUIRE( *r++ == 2 );
+	REQUIRE( *r++ == 2 );
+	REQUIRE( *r++ == 2 );
+	REQUIRE( *r++ == 2 );
 	REQUIRE( *r++ == 4 );
+	REQUIRE( !r );
+}
+
+
+TEST_CASE( "Diffing range keeps multiple duplicates in mismatches when some appear on right", "[narl][diffing_range][dedupe][multiple][symmetric]" )
+{
+	auto r = make_test_range< diffing_range_default >( from( { 1, 2, 2, 2, 2, 3, 4, 5 } ), from( { 1, 2, 2, 3, 5 } ) );
+
+	REQUIRE( *r++ == 2 );
+	REQUIRE( *r++ == 2 );
+	REQUIRE( *r++ == 4 );
+	REQUIRE( !r );
+}
+
+
+TEST_CASE( "Diffing range keeps multiple duplicates in mismatches when some appear on right in reverse", "[narl][diffing_range][dedupe][multiple][symmetric][reverse]" )
+{
+	auto r = make_test_range< diffing_range_default >( from( { 1, 2, 2, 2, 2, 3, 4, 5 } ), from( { 1, 2, 2, 3, 5 } ) );
+	r.goto_end();
+	--r;
+	REQUIRE( *r-- == 4 );
+	REQUIRE( *r-- == 2 );
+	REQUIRE( *r-- == 2 );
 	REQUIRE( !r );
 }
 
@@ -183,36 +221,40 @@ TEST_CASE( "Diffing range is invalid after last mismatch when last is mismatch i
 }
 
 
-TEST_CASE( "Diffing range skips duplicates in mismatches in reverse", "[narl][diffing_range][dedupe][reverse]" )
+TEST_CASE( "Diffing range keeps duplicates in mismatches in reverse", "[narl][diffing_range][dedupe][reverse]" )
 {
 	auto r = make_test_range< diffing_range_default >( from( { 1, 2, 2, 3, 4, 5 } ), from( { 1, 3, 5 } ) );
 	r.goto_end();
 
 	REQUIRE( *--r == 4 );
 	REQUIRE( *--r == 2 );
-	--r;
-	REQUIRE( !r );
-}
-
-
-TEST_CASE( "Diffing range skips multiple duplicates in mismatches in reverse", "[narl][diffing_range][dedupe][multiple][reverse]" )
-{
-	auto r = make_test_range< diffing_range_default >( from( { 1, 2, 2, 2, 2, 3, 4, 5 } ), from( { 1, 3, 5 } ) );
-	r.goto_end();
-
-	REQUIRE( *--r == 4 );
 	REQUIRE( *--r == 2 );
 	--r;
 	REQUIRE( !r );
 }
 
 
-TEST_CASE( "Diffing range skips duplicates in mismatches on right in reverse", "[narl][diffing_range][dedupe][right][reverse]" )
+TEST_CASE( "Diffing range keeps multiple duplicates in mismatches in reverse", "[narl][diffing_range][dedupe][multiple][reverse]" )
+{
+	auto r = make_test_range< diffing_range_default >( from( { 1, 2, 2, 2, 3, 4, 5 } ), from( { 1, 3, 5 } ) );
+	r.goto_end();
+
+	REQUIRE( *--r == 4 );
+	REQUIRE( *--r == 2 );
+	REQUIRE( *--r == 2 );
+	REQUIRE( *--r == 2 );
+	--r;
+	REQUIRE( !r );
+}
+
+
+TEST_CASE( "Diffing range keeps duplicates in mismatches on right in reverse", "[narl][diffing_range][dedupe][right][reverse]" )
 {
 	auto r = make_test_range< diffing_range_default >( from( { 1, 2, 2, 3, 4, 5 } ), from( { 3, 4, 4 } ) );
 	r.goto_end();
 
 	REQUIRE( *--r == 5 );
+	REQUIRE( *--r == 2 );
 	REQUIRE( *--r == 2 );
 	REQUIRE( *--r == 1 );
 	--r;
@@ -220,12 +262,14 @@ TEST_CASE( "Diffing range skips duplicates in mismatches on right in reverse", "
 }
 
 
-TEST_CASE( "Diffing range skips duplicates in mismatches at end in reverse", "[narl][diffing_range][dedupe][end][reverse]" )
+TEST_CASE( "Diffing range keeps duplicates in mismatches at end in reverse", "[narl][diffing_range][dedupe][end][reverse]" )
 {
 	auto r = make_test_range< diffing_range_default >( from( { 1, 2, 2, 3, 4, 4 } ), from( { 1, 3, 5 } ) );
 	r.goto_end();
 
 	REQUIRE( *--r == 4 );
+	REQUIRE( *--r == 4 );
+	REQUIRE( *--r == 2 );
 	REQUIRE( *--r == 2 );
 	--r;
 	REQUIRE( !r );
@@ -252,7 +296,7 @@ TEST_CASE( "Diffing range finds first diff when incremented from before begin", 
 
 TEST_CASE( "Diffing range can be post-decremented to find all matches", "[narl][diffing_range][all][postdecrement]" )
 {
-	auto r = make_test_range< diffing_range_default >( from( { 1, 2, 2, 3, 4, 4 } ), from( { 1, 3, 3, 5 } ) );
+	auto r = make_test_range< diffing_range_default >( from( { 1, 2, 3, 4 } ), from( { 1, 3, 5 } ) );
 	r.goto_end();
 	--r;
 
@@ -267,6 +311,8 @@ TEST_CASE( "Diffing range can be given custom comparer", "[narl][diffing_range][
 	auto r = make_test_range< diffing_range >( from( { 4, 4, 3, 2, 2, 1 } ), from( { 5, 3, 1 } ), []( int l, int r ) { return l > r; } );
 
 	REQUIRE( *r++ == 4 );
+	REQUIRE( *r++ == 4 );
+	REQUIRE( *r++ == 2 );
 	REQUIRE( *r++ == 2 );
 	REQUIRE( !r );
 }

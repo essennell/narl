@@ -17,19 +17,19 @@ namespace narl
 
 			void find_next_match() const
 			{
-				while( r && o && !( are_equal() ) )
+				while( r && o && !are_equal() )
 				{
-					while( r && o && cmp( *r, *o ) ) ++r;
-					while( o && r && cmp( *o, *r ) ) ++o;
+					while( r && ( !o || cmp( *r, *o ) ) ) ++r;
+					while( o && ( !r || cmp( *o, *r ) ) ) ++o;
 				}
 			}
 
 			void find_prev_match() const
 			{
-				while( r && o && !( are_equal() ) )
+				while( r && o && !are_equal() )
 				{
-					while( r && o && cmp( *r, *o ) ) --o;
-					while( r && o && cmp( *o, *r ) ) --r;
+					while( o && ( !r || cmp( *r, *o ) ) ) --o;
+					while( r && ( !o || cmp( *o, *r ) ) ) --r;
 				}
 			}
 
@@ -56,16 +56,8 @@ namespace narl
 
 			auto operator++() -> intersecting_range &
 			{
-				if( !r || !o )
-				{
-					if( !o ) ++o;
-					if( !r ) ++r;
-				}
-				else
-				{
-					while( r && o && !cmp( *o, *r ) )
-						++r;
-				}
+				++o;
+				++r;
 				find_next_match();
 				return *this;
 			}
@@ -80,16 +72,8 @@ namespace narl
 
 			auto operator--() -> intersecting_range &
 			{
-				if( !r || !o )
-				{
-					if( !r ) --r;
-					if( !o ) --o;
-				}
-				else
-				{
-					while( o && r && !cmp( *o, *r ) )
-						--o;
-				}
+				--r;
+				--o;
 				find_prev_match();
 				return *this;
 			}

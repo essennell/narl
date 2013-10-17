@@ -2,6 +2,8 @@
 
 #include "range_factory.h"
 
+#include <functional>
+
 
 namespace narl
 {
@@ -17,31 +19,27 @@ namespace narl
 
 			static void skip_forward( range_type & r, other_range & o, comparer cmp )
 			{
-				while( o && ( !r || cmp( *o, *r ) ) )
-					++o;
-				while( o && r && !cmp( *r, *o ) )
+				if( !r )
+					o.goto_end();
+				while( r && o && !cmp( *r, *o ) )
 				{
-					auto left = *r;
-					auto right = *o;
-					while( ++o && !cmp( right, *o ) )
-						;
-					while( ++r && !cmp( left, *r ) )
-						;
+					if( r && o && !cmp( *o, *r ) )
+						++r;
+					if( r && o && !cmp( *r, *o ) )
+						++o;
 				}
 			}
 
 			static void skip_backward( range_type & r, other_range & o, comparer cmp )
 			{
-				while( o && ( !r || cmp( *r, *o ) ) )
+				while( !r && o )
 					--o;
-				while( o && r && !cmp( *o, *r ) )
+				while( r && o && !cmp( *o, *r ) )
 				{
-					auto left = *r;
-					auto right = *o;
-					while( --o && !cmp( *o, right ) )
-						;
-					while( --r && !cmp( *r, left ) )
-						;
+					if( r && o && !cmp( *r, *o ) )
+						--r;
+					if( r && o && !cmp( *o, *r ) )
+						--o;
 				}
 			}
 
@@ -69,12 +67,6 @@ namespace narl
 					++r;
 					++o;
 				}
-				else if( r )
-				{
-					auto v = *r;
-					while( ++r && !cmp( v, *r ) )
-						;
-				}
 				else
 					++r;
 				skip( r, o, cmp );
@@ -97,12 +89,8 @@ namespace narl
 					--r;
 					--o;
 				}
-				else if( r )
-				{
-					auto v = *r;
-					while( --r && !cmp( *r, v ) )
-						;
-				}
+				else
+					--r;
 				skip( r, o, cmp );
 				return *this;
 			}

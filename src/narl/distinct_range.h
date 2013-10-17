@@ -34,7 +34,7 @@ namespace narl
 				else
 				{
 					auto v = *r;
-					while( ++r && !cmp( v, *r ) )
+					while( ++r && cmp( v, *r ) )
 						;
 				}
 				return *this;
@@ -54,7 +54,7 @@ namespace narl
 				else
 				{
 					auto v = *r;
-					while( --r && !cmp( *r, v ) )
+					while( --r && cmp( *r, v ) )
 						;
 				}
 				return *this;
@@ -80,12 +80,12 @@ namespace narl
 	};
 
 	template< typename range_type >
-	class distinct_range_default : public distinct_range< range_type, std::less< decltype( *std::declval< range_type >() ) > >
+	class distinct_range_default : public distinct_range< range_type, std::equal_to< decltype( *std::declval< range_type >() ) > >
 	{
 
 		public:
 			distinct_range_default( const range_type & r )
-				: distinct_range< range_type, std::less< decltype( *r ) > >( r, std::less< decltype( *r ) >() )
+				: distinct_range< range_type, std::equal_to< decltype( *r ) > >( r, std::equal_to< decltype( *r ) >() )
 			{
 			}
 

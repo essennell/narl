@@ -246,11 +246,12 @@ TEST_CASE( "Unioning range is valid at end of left range when element remain on 
 }
 
 
-TEST_CASE( "Unioning range removes duplicates on left", "[narl][unioning_range][dedupe][left]" )
+TEST_CASE( "Unioning range keeps duplicates on left", "[narl][unioning_range][dedupe][left]" )
 {
 	auto r = make_test_range< unioning_range_default >( from( { 1, 2, 2, 3 } ), from( { 2, 3, 4 } ) );
 
 	REQUIRE( *r++ == 1 );
+	REQUIRE( *r++ == 2 );
 	REQUIRE( *r++ == 2 );
 	REQUIRE( *r++ == 3 );
 	REQUIRE( *r++ == 4 );
@@ -258,19 +259,20 @@ TEST_CASE( "Unioning range removes duplicates on left", "[narl][unioning_range][
 }
 
 
-TEST_CASE( "Unioning range removes duplicates on right", "[narl][unioning_range][dedupe][right]" )
+TEST_CASE( "Unioning range keeps duplicates on right", "[narl][unioning_range][dedupe][right]" )
 {
 	auto r = make_test_range< unioning_range_default >( from( { 1, 2, 3 } ), from( { 2, 3, 3, 4 } ) );
 
 	REQUIRE( *r++ == 1 );
 	REQUIRE( *r++ == 2 );
 	REQUIRE( *r++ == 3 );
+	REQUIRE( *r++ == 3 );
 	REQUIRE( *r++ == 4 );
 	REQUIRE( !r );
 }
 
 
-TEST_CASE( "Unioning range removes duplicates on left in reverse", "[narl][unioning_range][dedupe][left][reverse]" )
+TEST_CASE( "Unioning range keeps duplicates on left in reverse", "[narl][unioning_range][dedupe][left][reverse]" )
 {
 	auto r = make_test_range< unioning_range_default >( from( { 1, 2, 2, 3 } ), from( { 2, 3, 4 } ) );
 	r.goto_end();
@@ -278,17 +280,19 @@ TEST_CASE( "Unioning range removes duplicates on left in reverse", "[narl][union
 	REQUIRE( *--r == 4 );
 	REQUIRE( *--r == 3 );
 	REQUIRE( *--r == 2 );
+	REQUIRE( *--r == 2 );
 	REQUIRE( *--r == 1 );
 	REQUIRE( !--r );
 }
 
 
-TEST_CASE( "Unioning range removes duplicates on right in reverse", "[narl][unioning_range][dedupe][right][reverse]" )
+TEST_CASE( "Unioning range keeps duplicates on right in reverse", "[narl][unioning_range][dedupe][right][reverse]" )
 {
 	auto r = make_test_range< unioning_range_default >( from( { 1, 2, 3 } ), from( { 2, 3, 3, 4 } ) );
 	r.goto_end();
 
 	REQUIRE( *--r == 4 );
+	REQUIRE( *--r == 3 );
 	REQUIRE( *--r == 3 );
 	REQUIRE( *--r == 2 );
 	REQUIRE( *--r == 1 );

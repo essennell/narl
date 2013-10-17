@@ -1,5 +1,6 @@
 #pragma once
 
+#include "range.h"
 #include "range_factory.h"
 
 
@@ -11,9 +12,9 @@ namespace narl
 	{
 
 		private:
-			mutable inner_range r, old_r;
-			mutable outer_range o, old_o;
-			bool reset_r, reset_o;
+			mutable range< decltype( *std::declval< inner_range >() ) > r, old_r;
+			mutable outer_range o;
+			bool reset_r;
 			inner_key_selector inner;
 			outer_key_selector outer;
 			transformation expr;
@@ -47,7 +48,7 @@ namespace narl
 
 		public:
 			joined_range( const inner_range & r, const outer_range & o, const inner_key_selector & inner, const outer_key_selector outer, const transformation & expr, const key_comparer cmp )
-				: r{ r }, old_r{ r }, o{ o }, old_o{ o }, reset_r{ false }, reset_o{ false }, inner( inner ), outer( outer ), expr( expr ), cmp( cmp )
+				: r{ r }, old_r{ r }, o{ o }, reset_r{ false }, inner( inner ), outer( outer ), expr( expr ), cmp( cmp )
 			{
 			}
 
@@ -104,19 +105,19 @@ namespace narl
 				}
 				else
 				{
-					auto tmp = o;
-					if( o && r && --tmp && !cmp( outer( *tmp ), inner( *r ) ) )
+					auto tmp = r;
+					if( o && r && --tmp && !cmp( inner( *tmp ), outer( *o ) ) )
 					{
-						old_o = o--;
-						reset_o = true;
+						old_r = r--;
+						reset_r = true;
 					}
 					else
 					{
-						--r;
-						if( reset_o )
+						--o;
+						if( reset_r )
 						{
-							o = old_o;
-							reset_o = false;
+							r = old_r;
+							reset_r = false;
 						}
 					}
 				}				
@@ -165,5 +166,11 @@ namespace narl
 			}
 
 	};
+
+	template< typename outer_range, typename inner_key_selector, typename outer_key_selector, typename transformation >
+	auto join( const outer_range & o, const inner_key_selector & inner, const outer_key_selector & outer, const transformation & t ) -> decltype( make_factory< joined_range_default >( o, inner, outer, t ) )
+	{
+		return make_factory< joined_range_default >( o, inner, outer, t );
+	}
 
 }

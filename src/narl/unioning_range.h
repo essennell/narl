@@ -28,7 +28,7 @@ namespace narl
 			auto operator*() const -> decltype( *r )
 			{
 				if( r && o )
-					return std::min( *r, *o, cmp );
+					return cmp( *r, *o ) ? *r : *o;
 				if( r ) return *r;
 				return *o;
 			}
@@ -37,14 +37,13 @@ namespace narl
 			{
 				if( r && o )
 				{
-					auto left = *r;
-					auto right = *o;
-					if( !cmp( right, left ) )
-						while( ++r && !cmp( left, *r ) )
-							;
-					if( !cmp( left, right ) )
-						while( ++o && !cmp( right, *o ) )
-							;
+					if( !cmp( *o, *r ) )
+					{
+						if( !cmp( *r++, *o ) )
+							++o;
+					}
+					else
+						++o;
 				}
 				else
 				{
@@ -63,16 +62,15 @@ namespace narl
 
 			auto operator--() -> unioning_range &
 			{
-				auto left = r--;
-				auto right = o--;
-				while( left && r && !cmp( *r, *left ) )
-					--r;
-				while( right && o && !cmp( *o, *right ) )
-					--o;
-				if( o && r && cmp( *r, *o ) )
-					r = left;
-				else if( r && o && cmp( *o, *r ) )
-					o = right;
+				--r;
+				--o;
+				if( r && o )
+				{
+					if( cmp( *r, *o ) )
+						++r;
+					else if( cmp( *o, *r ) )
+						++o;
+				}
 				return *this;
 			}
 

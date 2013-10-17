@@ -8,6 +8,7 @@
 #include "intersecting_range.h"
 #include "iterable_range.h"
 #include "joined_range.h"
+#include "merging_range.h"
 #include "partial_range.h"
 #include "range.h"
 #include "range_accumulate.h"
@@ -15,6 +16,7 @@
 #include "range_input_iterator.h"
 #include "range_generator.h"
 #include "range_predicate.h"
+#include "range_tocontainer.h"
 #include "reversed_range.h"
 #include "sorted_range.h"
 #include "transforming_range.h"
@@ -53,7 +55,23 @@ namespace narl
 		auto result = v( r );
 		return result.value();
 	}
+
+	template< typename range_type, typename other_range_type >
+	auto operator|( const range_type & r, const range_2_factory< range_equality_default, other_range_type > & v ) -> bool
+	{
+		auto result = v( r );
+		return result.value();
+	}
+
+
 #ifndef _MSC_VER
+
+	template< typename range_type, typename other_range_type, typename comparitor >
+	auto operator|( const range_type & r, const range_N_factory< range_equality, other_range_type, comparitor > & v ) -> bool
+	{
+		auto result = v( r );
+		return result.value();
+	}
 
 	template< typename range_type, typename argument_type, typename accumulator >
 	auto operator|( const range_type & r, const range_N_factory< range_accumulate, argument_type, accumulator > & v ) -> decltype( v( r ).value() )
@@ -63,6 +81,13 @@ namespace narl
 	}
 
 #else
+
+	template< typename range_type, typename other_range_type, typename comparitor >
+	auto operator|( const range_type & r, const range_3_factory< range_equality, other_range_type, comparitor > & v ) -> bool
+	{
+		auto result = v( r );
+		return result.value();
+	}
 
 	template< typename range_type, typename argument_type, typename accumulator >
 	auto operator|( const range_type & r, const range_3_factory< range_accumulate, argument_type, accumulator > & v ) -> decltype( v( r ).value() )
