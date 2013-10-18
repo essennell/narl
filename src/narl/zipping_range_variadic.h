@@ -146,23 +146,11 @@ namespace narl
 	};
 
 
-#ifndef _MSC_VER
-
 	template< typename... range_type >
 	auto zipwith( const range_type &... r ) -> decltype( make_factory< zipping_range >( r... ) )
 	{
 		return make_factory< zipping_range >( r... );
 	}
-
-#else
-
-	template< typename range_type >
-	auto zipwith( const range_type & r ) -> decltype( make_factory< zipping_range >( r ) )
-	{
-		return make_factory< zipping_range >( r );
-	}
-
-#endif
 
 }
 

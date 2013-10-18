@@ -14,26 +14,74 @@
 using namespace narl;
 
 
-TEST_CASE( "Default constructed range is invalid", "[narl][range][default][invalid]" )
+TEST_CASE( "Range can be initialised from named container", "[narl][container][reference]" )
 {
-	iterable_range< std::vector< int >::const_iterator, int > r;
+	std::vector< int > data { 1, 2, 3 };
+	std::vector< int > original { data };
+	
+	SECTION( "Scope" )
+	{
+		auto r = from( data );
+		REQUIRE( *r++ == 1 );
+		REQUIRE( *r++ == 2 );
+		REQUIRE( *r++ == 3 );
+		REQUIRE( !r );
+	}
+	REQUIRE( std::equal( std::begin( data ), std::end( data ), std::begin( original ) ) );
+}
+
+
+TEST_CASE( "Range can be initialised from temp container", "[narl][container][temp]" )
+{
+	auto r = from( std::vector< int > { 1, 2, 3 } );
+	REQUIRE( *r++ == 1 );
+	REQUIRE( *r++ == 2 );
+	REQUIRE( *r++ == 3 );
 	REQUIRE( !r );
 }
 
 
-TEST_CASE( "Default constructed range is invalid after increment", "[narl][range][default][invalid][increment]" )
+TEST_CASE( "Range can be initialised from named init list", "[narl][init_list][reference]" )
 {
-	iterable_range< std::vector< int >::const_iterator, int > r;
-	++r;
+	auto data = { 1, 2, 3 };
+	std::vector< int > original{ data };
+
+	SECTION( "Scope" )
+	{
+		auto r = from( data );
+		REQUIRE( *r++ == 1 );
+		REQUIRE( *r++ == 2 );
+		REQUIRE( *r++ == 3 );
+		REQUIRE( !r );
+	}
+	REQUIRE( std::equal( std::begin( data ), std::end( data ), std::begin( original ) ) );
+}
+
+
+TEST_CASE( "Range can be initialised from temp init list", "[narl][init_list][temp]" )
+{
+	auto r = from( { 1, 2, 3 } );
+	REQUIRE( *r++ == 1 );
+	REQUIRE( *r++ == 2 );
+	REQUIRE( *r++ == 3 );
 	REQUIRE( !r );
 }
 
 
-TEST_CASE( "Default constructed range is invalid after decrement", "[narl][range][default][invalid][decrement]" )
+TEST_CASE( "Range can be initialised from array", "[narl][array]" )
 {
-	iterable_range< std::vector< int >::const_iterator, int > r;
-	--r;
-	REQUIRE( !r );
+	int data [] = { 1, 2, 3 };
+	std::vector< int > original{ std::begin( data ), std::end( data ) };
+
+	SECTION( "Scope" )
+	{
+		auto r = from( data );
+		REQUIRE( *r++ == 1 );
+		REQUIRE( *r++ == 2 );
+		REQUIRE( *r++ == 3 );
+		REQUIRE( !r );
+	}
+	REQUIRE( std::equal( std::begin( data ), std::end( data ), std::begin( original ) ) );
 }
 
 

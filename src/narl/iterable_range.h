@@ -14,27 +14,8 @@ namespace narl
 	{
 
 		public:
-			iterable_range()
-				: before_begin{ true }
-#ifdef _MSC_VER
-			, invalid{ true }
-#endif
-			{
-			}
-
-			iterable_range( const iterable_range & other )
-				: startpos{ other.startpos }, endpos{ other.endpos }, pos{ other.pos }, before_begin{ other.before_begin }
-#ifdef _MSC_VER
-			, invalid{ other.invalid }
-#endif
-			{
-			}
-
 			iterable_range( iterator_type startpos, iterator_type endpos )
 				: startpos{ startpos }, endpos{ endpos }, pos{ startpos }, before_begin{ false }
-#ifdef _MSC_VER
-			, invalid{ false }
-#endif
 			{
 			}
 			
@@ -48,9 +29,6 @@ namespace narl
 
 			auto operator++() -> iterable_range &
 			{
-#ifdef _MSC_VER
-				if( !invalid )
-#endif
 				if( pos != endpos )
 				{
 					if( before_begin )
@@ -70,10 +48,7 @@ namespace narl
 
 			auto operator--() -> iterable_range &
 			{
-#ifdef _MSC_VER
-				if( !invalid )
-#endif
-				if( ! before_begin )
+				if( !before_begin )
 				{
 					if( pos == startpos )
 						before_begin = true;
@@ -97,9 +72,6 @@ namespace narl
 			
 			explicit operator bool() const 
 			{
-#ifdef _MSC_VER
-				if( invalid ) return false;
-#endif
 				return !before_begin && pos != endpos;
 			}
 
@@ -108,19 +80,33 @@ namespace narl
 			iterator_type startpos, endpos;
 			iterator_type pos;
 			bool before_begin;
-#ifdef _MSC_VER
-			bool invalid;
-#endif
 	};
 
 
-	template< typename value_type >
-	class iterable_initlist_range
+	template< template< typename... > class container_type, typename value_type >
+	class own_container_range
 	{
 
 		public:
-			iterable_initlist_range( const std::initializer_list< value_type > & src )
-				: src{ std::make_shared< std::vector< value_type > >( src ) }, pos{ std::begin( *( this->src ) ) }, before_begin{ false }
+#ifndef _MSC_VER
+			own_container_range( container_type< value_type > && src )
+#else
+			own_container_range( container_type< value_type, std::allocator< value_type > > && src )
+#endif
+#ifndef _MSC_VER
+				: src{ std::make_shared< container_type< value_type > >( std::move( src ) ) }, pos{ std::begin( *( this->src ) ) }, before_begin{ false }
+#else
+				: src{ std::make_shared< container_type< value_type, std::allocator< value_type > > >( std::move( src ) ) }, pos{ std::begin( *( this->src ) ) }, before_begin{ false }
+#endif
+			{
+			}
+
+			own_container_range( std::initializer_list< value_type > && src )
+#ifndef _MSC_VER
+				: src{ std::make_shared< container_type< value_type > >( std::move( src ) ) }, pos{ std::begin( *( this->src ) ) }, before_begin{ false }
+#else
+				: src{ std::make_shared< container_type< value_type, std::allocator< value_type > > >( std::move( src ) ) }, pos{ std::begin( *( this->src ) ) }, before_begin{ false }
+#endif
 			{
 			}
 
@@ -132,7 +118,7 @@ namespace narl
 				return *pos;
 			}
 
-			auto operator++() -> iterable_initlist_range &
+			auto operator++() -> own_container_range &
 			{
 				if( pos != std::end( *src ) )
 				{
@@ -144,14 +130,14 @@ namespace narl
 				return *this;
 			}
 
-			auto operator++( int ) -> iterable_initlist_range
+			auto operator++( int ) -> own_container_range
 			{
-				iterable_initlist_range tmp{ *this };
+				own_container_range tmp{ *this };
 				++*this;
 				return tmp;
 			}
 
-			auto operator--() -> iterable_initlist_range &
+			auto operator--() -> own_container_range &
 			{
 				if( !before_begin )
 				{
@@ -163,9 +149,9 @@ namespace narl
 				return *this;
 			}
 
-			auto operator--( int ) -> iterable_initlist_range
+			auto operator--( int ) -> own_container_range
 			{
-				iterable_initlist_range tmp{ *this };
+				own_container_range tmp{ *this };
 				--*this;
 				return tmp;
 			}
@@ -181,15 +167,14 @@ namespace narl
 			}
 
 
-			operator iterable_range< typename std::vector< value_type >::const_iterator, value_type >() const
-			{
-				return iterable_range< typename std::vector< value_type >::const_iterator, value_type >( pos, std::end( *src ) );
-			}
-
-
 		private:
-			std::shared_ptr< std::vector< value_type > > src;
-			typename std::vector< value_type >::const_iterator pos;
+#ifndef _MSC_VER
+			std::shared_ptr< container_type< value_type > > src;
+			typename container_type< value_type >::const_iterator pos;
+#else
+			std::shared_ptr< container_type< value_type, std::allocator< value_type > > > src;
+			typename container_type< value_type, std::allocator< value_type > >::const_iterator pos;
+#endif
 			bool before_begin;
 	};
 
@@ -202,6 +187,18 @@ namespace narl
 			{ std::begin( src ), std::end( src ) };
 	}
 
+	template< template< typename... > class container, typename value_type >
+#ifndef _MSC_VER
+	auto from( container< value_type > && c )
+#else
+//	template< template< typename, typename > class container, typename value_type >
+	auto from( container< value_type, std::allocator< value_type > > && c )
+#endif
+		-> own_container_range< container, value_type >
+	{
+		return own_container_range< container, value_type > { std::move( c ) };
+	}
+
 	template< typename value_type, size_t len >
 	auto from( value_type( &array )[ len ] ) 
 		-> iterable_range< const value_type*, value_type >
@@ -212,10 +209,18 @@ namespace narl
 
 	template< typename item_type >
 	auto from( const std::initializer_list< item_type > & src ) 
-		-> iterable_initlist_range< item_type >
+		-> iterable_range< typename std::initializer_list< item_type >::const_iterator, item_type >
 	{
-		return iterable_initlist_range< item_type >
-			{ src };
+		return iterable_range< typename std::initializer_list< item_type >::const_iterator, item_type >
+			{ std::begin( src ), std::end( src ) };
+	}
+
+	template< typename item_type >
+	auto from( std::initializer_list< item_type > && src ) 
+		-> own_container_range< std::vector, item_type >
+	{
+		return own_container_range< std::vector, item_type >
+			{ std::move( src ) };
 	}
 
 }
