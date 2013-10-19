@@ -48,6 +48,16 @@ auto r = from( src )
 	| select( []( const item & i ) { return i.name(); } );
 ```
 
+Lastly, you can "re-hydrate" a range back into a standard container with ```to```:
+
+```c++
+auto r = from( { 1, 2, 3 } ) 
+	| select( []( int i ) { return std::to_string( i ); } ) 
+	| to< std::list >();
+
+	// or to< std::vector >() for example
+```
+
 The full list of implemented expressions is:
 
 [aggregate](doc/aggregate.md) [all](doc/anyall.md) [any](doc/anyall.md) [concat](doc/select.md) [count](doc/aggregate.md) [distinct](doc/setops.md) [except](doc/setops.md) [groupby](doc/groupby.md) [join](doc/groupby.md)* [intersect](doc/setops.md) [reverse](doc/select.md) [select](doc/select.md) [selectmany](doc/select.md) [sequenceequal](doc/aggregate.md) [skip](doc/skiptake.md) [skipwhile](doc/skiptake.md) [sorted](doc/select.md) [take](doc/skiptake.md) [takewhile](doc/skiptake.md) [union](doc/setops.md) [zip](doc/select.md)
