@@ -1,6 +1,7 @@
 # narl
 
-Not Another Range Library
+Not Another Range Library - Overload at [ACCU](http://accu.org):
+[Range and Elevation](http://accu.org/var/uploads/journals/Overload117.pdf)
 
 #Get started
 
