@@ -1,3 +1,3 @@
 # any and all
 
-[HOME][../README.md]
+[Home](../README.md)
