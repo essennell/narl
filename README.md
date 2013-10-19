@@ -6,7 +6,7 @@ Not Another Range Library
 
 Narl is a header-only library for C++. You'll need gcc 4.8 or better, or MS Visual Studio 2013. Not all the features are available in Visual Studio. The code also compiles with Clang 3.2, with some warnings.
 
-Add the src/include folder to you search path and include ```<narl.h>```.
+Add the ```src/include folder```to you search path and include ```<narl.h>```.
 
 The library is based around the idea of Ranges, but for the most part, these aren't directly used. Instead, you compose expressions from Narl, and let the compiler figure out what the result is. 
 For example:
@@ -50,7 +50,7 @@ auto r = from( src )
 
 The full list of implemented expressions is:
 
-aggregate all any concat count distinct except groupby join* intersect reverse select selectmany sequenceequal skip skipwhile sorted take takewhile union zip
+[aggregate](doc/aggregate.md) [all](doc/anyall.md) [any](doc/anyall.md) [concat](doc/select.md) [count](doc/aggregate.md) [distinct](doc/setops.md) [except](doc/setops.md) [groupby](doc/groupby.md) [join](doc/groupby.md)* [intersect](doc/setops.md) [reverse](doc/select.md) [select](doc/select.md) [selectmany](doc/select.md) [sequenceequal](doc/aggregate.md) [skip](doc/skiptake.md) [skipwhile](doc/skiptake.md) [sorted](doc/select.md) [take](doc/skiptake.md) [takewhile](doc/skiptake.md) [union](doc/setops.md) [zip](doc/select.md)
 
 (*join does not work in VS2013)
 
