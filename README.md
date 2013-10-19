@@ -1,5 +1,4 @@
 # narl
-====
 
 Not Another Range Library
 
@@ -9,9 +8,10 @@ Narl is a header-only library for C++. You'll need gcc 4.8 or better, or MS Visu
 
 Add the src/include folder to you search path and include ```<narl.h>```.
 
-The library is based around the idea of Ranges, but for the most part, these aren't directly used. Instead, you compose expressions from Narl, and let the compiler figure out what the result is. For example:
+The library is based around the idea of Ranges, but for the most part, these aren't directly used. Instead, you compose expressions from Narl, and let the compiler figure out what the result is. 
+For example:
 
-'''c++
+```c++
 #include <narl.h>
 
 #include <iostream>
