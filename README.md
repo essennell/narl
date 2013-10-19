@@ -54,7 +54,7 @@ aggregate all any concat count distinct except groupby join* intersect reverse s
 
 (*join does not work in VS2013)
 
-For some example code, see [narl_stl.h](src/tests/testnarl/narl_stl.h) which has some narl expressions showing implementations of C++ standard algorithms.
+For some example code, see [narl_stl.h](https://github.com/essennell/narl/tree/master/src/tests/testnarl/narl_stl.h) which has some narl expressions showing implementations of C++ standard algorithms.
 
 ## Building the tests
 
