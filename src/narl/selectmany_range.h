@@ -1,6 +1,7 @@
 #pragma once
 
 #include "range.h"
+#include "range_factory.h"
 
 #include <memory>
 #include <type_traits>
@@ -104,5 +105,11 @@ namespace narl
 			}
 
 	};
+
+	template< typename binder >
+	auto selectmany( const binder & b ) -> decltype( make_factory< selectmany_range >( b ) )
+	{
+		return make_factory< selectmany_range >( b );
+	}
 
 }

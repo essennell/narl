@@ -6,6 +6,8 @@ This is the transforming operation. It takes the elements of an input range and 
 
 ```c++
 auto transformed = from( { 1, 2, 3 } ) | select( []( int i ) { return std::to_string( i * 10 ) } );
+
+// Produces { "10", "20", "30" }
 ```
 
 ## where
@@ -13,7 +15,9 @@ auto transformed = from( { 1, 2, 3 } ) | select( []( int i ) { return std::to_st
 This is the basic filtering operation which only returns elements which match the provided predicate.
 
 ```c++
-auto filtered = from( { 1, 2, 3 4 } ) | where( []( int i ) { return i % 2 == 0; } );
+auto filtered = from( { 1, 2, 3, 4 } ) | where( []( int i ) { return i % 2 == 0; } );
+
+// Produces { 2, 4 }
 ```
 
 ## reverse
@@ -22,6 +26,8 @@ Does exactly what it says on the tin - produces the elements of the input range 
 
 ```c++
 auto reversed = from( { 1, 2, 3 } ) | reverse()
+
+// Produces { 3, 2, 1 }
 ```
 
 ## sorted
@@ -34,16 +40,20 @@ The sorting is stable. The buffer is a ```std::list``` and sorting uses the list
 
 ```c++
 auto r = from( { 3, 2, 1 } ) | sorted();
+
+// Produces { 3, 2, 1 }
 ```
 
 Not recommended, but this produces a reverse-ordered range:
 ```c++
 auto r = from( { 1, 2, 3 } ) | sorted( []( int left, int right ) { return right < left; } );
+
+// Produces { 1, 2, 3 }
 ```
 
 ## selectmany
 
-This is a flattening operation, and is similar to the ```bind``` operation for amplified types in functional programming. THe provided expression needs to return a range; the ranges from each of the original elements are then "flattened" into a single range of individual elements from those ranges (as if they were concatenated).
+This is a flattening operation, and is similar to the ```bind``` operation for amplified types in functional programming. The provided expression needs to return a range; the ranges from each of the original elements are then "flattened" into a single range of individual elements from those ranges (as if they were concatenated).
 
 ```c++
 struct item
@@ -51,8 +61,14 @@ struct item
 	int id;
 	std::vector< std::string > subitems;
 };
-std::vector< item > items { ... };
+std::vector< item > items { 
+	item { 1, { "1", "One" } },
+	item { 1, { "2", "Two" } },
+	item { 1, { "3", "Three" } },
+};
 auto r = from( items ) | selectmany( []( const item & i ) { return from( i.subitems ); } );
+
+// Produces { "1", "One", "2", "Two", "3", "Three" }
 ```
 
 ## zipwith

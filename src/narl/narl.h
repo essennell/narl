@@ -18,6 +18,7 @@
 #include "range_predicate.h"
 #include "range_tocontainer.h"
 #include "reversed_range.h"
+#include "selectmany_range.h"
 #include "sorted_range.h"
 #include "transforming_range.h"
 #include "unioning_range.h"

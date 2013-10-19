@@ -390,6 +390,21 @@ TEST_CASE( "Reverse produces elements in reverse order from skip", "[narl][rever
 }
 
 
+TEST_CASE( "Select many produces flattened range of provided ranges", "[narl][selectmany]" )
+{
+	std::vector< int > items { 10, 11, 12 };
+	auto r = from( { 1, 2, 3 } ) | selectmany( [&items]( int i ) { return from( items ); } );
+
+	int index = 0;
+	for( auto i : r )
+	{
+		REQUIRE( i[ index++ ] == items[ 0 ] );
+		REQUIRE( i[ index++ ] == items[ 1 ] );
+		REQUIRE( i[ index++ ] == items[ 2 ] );
+	}
+}
+
+
 TEST_CASE( "Reverse fails to compile for skip from infinite range", "[narl][reverse][skip][infinite]" )
 {
 	auto r = make_range< int >() | skip( 20 ) | reverse();
