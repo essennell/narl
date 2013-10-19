@@ -72,4 +72,4 @@ Narl uses [Catch](https://github.com/philsquared/Catch) which is referenced as a
 
 You'll need to initialize and update the submodule reference if you fork narl.
 
-In the ```src/tests/testnarl``` folder is a makefile for g++ and a .sln file for Visual Studio.
+Test sources are in the ```src/tests/testnarl``` folder. There is a makefile for g++ and a .sln file for Visual Studio in ```src```.
