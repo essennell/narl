@@ -24,7 +24,7 @@ TEST_CASE( "Joined range is lazy evaluated", "[narl][join][lazy]" )
 	REQUIRE_THROWS_AS( --r, range_access_exception );
 	REQUIRE_THROWS_AS( r++, range_access_exception );
 	REQUIRE_THROWS_AS( r--, range_access_exception );
-	REQUIRE_THROWS_AS( !r, range_access_exception );
+	REQUIRE_THROWS_AS( r && true, range_access_exception );
 }
 
 
@@ -420,7 +420,7 @@ TEST_CASE( "Joined range can produce a different result type from 2 inputs", "[n
 		[]( const std::string & l, int r ) { return result{ "ID:" + l, l.size(), r * 2 }; } );
 
 	REQUIRE( ( *r ).s == "ID:2" );
-	REQUIRE( ( *r ).l == 1 );
+	REQUIRE( ( *r ).l == 1u );
 	REQUIRE( ( *r ).i == 4 );
 }
 

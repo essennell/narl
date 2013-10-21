@@ -16,7 +16,7 @@ TEST_CASE( "Zipping range of 2 is evaluated lazily", "[narl][zipped][lazy][2]" )
 	REQUIRE_THROWS_AS( ++r, range_access_exception );
 	REQUIRE_THROWS_AS( r++, range_access_exception );
 	REQUIRE_THROWS_AS( *r, range_access_exception );
-	REQUIRE_THROWS_AS( ( !r ), range_access_exception );
+	REQUIRE_THROWS_AS( r && true, range_access_exception );
 }
 
 #ifndef _MSC_VER
@@ -28,7 +28,7 @@ TEST_CASE( "Zipping range of 3 is evaluated lazily", "[narl][zipped][lazy][3]" )
 	REQUIRE_THROWS_AS( ++r, range_access_exception );
 	REQUIRE_THROWS_AS( r++, range_access_exception );
 	REQUIRE_THROWS_AS( *r, range_access_exception );
-	REQUIRE_THROWS_AS( ( !r ), range_access_exception );
+	REQUIRE_THROWS_AS( r && true, range_access_exception );
 }
 
 
@@ -39,7 +39,7 @@ TEST_CASE( "Zipping range of 4 is evaluated lazily", "[narl][zipped][lazy][4]" )
 	REQUIRE_THROWS_AS( ++r, range_access_exception );
 	REQUIRE_THROWS_AS( r++, range_access_exception );
 	REQUIRE_THROWS_AS( *r, range_access_exception );
-	REQUIRE_THROWS_AS( ( !r ), range_access_exception );
+	REQUIRE_THROWS_AS( r && true, range_access_exception );
 }
 
 #endif

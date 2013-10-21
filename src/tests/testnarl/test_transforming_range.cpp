@@ -16,7 +16,7 @@ TEST_CASE( "Transforming range is evaluated lazily", "[narl][transforming_range]
 	REQUIRE_THROWS_AS( ++r, range_access_exception );
 	REQUIRE_THROWS_AS( r++, range_access_exception );
 	REQUIRE_THROWS_AS( *r, range_access_exception );
-	REQUIRE_THROWS_AS( ( !r ), range_access_exception );
+	REQUIRE_THROWS_AS( r && true, range_access_exception );
 }
 
 

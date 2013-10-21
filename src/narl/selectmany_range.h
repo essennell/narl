@@ -21,10 +21,12 @@ namespace narl
 
 #ifndef _MSC_VER
 			mutable range< decltype( *expr( *r ) ) > buffer;
+			mutable decltype( *r ) current;
 #else
 			typedef decltype( *std::declval< range_type >() ) param_type;
 			typedef typename std::result_of< binder( param_type ) >::type result_type;
 			mutable range< decltype( *std::declval< result_type >() ) > buffer;
+			mutable param_type current;
 #endif
 
 			void extract() const
@@ -32,7 +34,10 @@ namespace narl
 				if( r )
 				{
 					if( !buffer )
-						buffer = expr( *r );
+					{
+						current = *r;
+						buffer = expr( current );
+					}
 				}
 				else
 					buffer = range< decltype( *expr( *r ) ) >{};

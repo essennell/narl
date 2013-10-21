@@ -1,4 +1,5 @@
-CLANGINC=-Id:/bin/mingw64/include/c++/4.8.1 -Id:/bin/mingw64/include/c++/4.8.1/x86_64-w64-mingw32 -pedantic -fsyntax-only
+CLANGINC=-Id:/bin/mingw64/include/c++/4.8.1 -Id:/bin/mingw64/include/c++/4.8.1/x86_64-w64-mingw32 -pedantic 
+#-fsyntax-only
 # CLANGINC=-Ic:/bin/gcc/mingw/include/c++/4.8.1 -Ic:/bin/gcc/mingw/include/c++/4.8.1/x86_64-w64-mingw32 -pedantic -fsyntax-only
 INCLUDE=$(CLANGINC) -Inarl -I../externals/catch/single_include
 OBJDIR=tmp
@@ -32,7 +33,7 @@ CPPFLAGS=-std=c++11 -Wall -Wextra -Wpedantic
 CC=clang++ 
 
 testnarlclang.exe: $(OBJS)
-	$(CC) $(CPPFLAGS) -o $@ $^
+	ECHO $(CC) $(CPPFLAGS) -o $@ $^
 
 include $(OBJS:.oclang=.dclang)
 

@@ -18,7 +18,7 @@ TEST_CASE( "Concatenating range is lazy evaluated", "[narl][concat][lazy]" )
 	REQUIRE_THROWS_AS( --r, range_access_exception );
 	REQUIRE_THROWS_AS( r++, range_access_exception );
 	REQUIRE_THROWS_AS( r--, range_access_exception );
-	REQUIRE_THROWS_AS( !r, range_access_exception );
+	REQUIRE_THROWS_AS( r && r, range_access_exception );
 }
 
 

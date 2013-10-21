@@ -260,7 +260,7 @@ TEST_CASE( "Select doesn't evaluate the range", "[narl][select][deferred]" )
 	REQUIRE_THROWS_AS( ++r, range_access_exception );
 	REQUIRE_THROWS_AS( r++, range_access_exception );
 	REQUIRE_THROWS_AS( *r, range_access_exception );
-	REQUIRE_THROWS_AS( ( !r ), range_access_exception );
+	REQUIRE_THROWS_AS( r && true, range_access_exception );
 }
 
 
@@ -369,12 +369,13 @@ TEST_CASE( "Reverse produces elements in reverse order from take", "[narl][rever
 }
 
 
+/*
 TEST_CASE( "Reverse fails to compile for infinite range", "[narl][reverse][infinite]" )
 {
 	auto r = make_range< int >() | reverse();
 	//REQUIRE( !r );
 }
-
+*/
 
 TEST_CASE( "Reverse produces elements in reverse order from skip", "[narl][reverse][skip]" )
 {
@@ -392,25 +393,37 @@ TEST_CASE( "Reverse produces elements in reverse order from skip", "[narl][rever
 
 TEST_CASE( "Select many produces flattened range of provided ranges", "[narl][selectmany]" )
 {
-	std::vector< int > items { 10, 11, 12 };
-	auto r = from( { 1, 2, 3 } ) | selectmany( [&items]( int i ) { return from( items ); } );
-
-	int index = 0;
-	for( auto i : r )
+	struct item
 	{
-		REQUIRE( i[ index++ ] == items[ 0 ] );
-		REQUIRE( i[ index++ ] == items[ 1 ] );
-		REQUIRE( i[ index++ ] == items[ 2 ] );
-	}
+		int id;
+		std::vector< int > items;
+	};
+	std::vector< item > src
+	{
+		item{ 0, { 10, 20 } },
+		item{ 1, { 11, 21 } },
+		item{ 2, { 12, 22 } },
+	};
+
+	auto r = from( src ) | selectmany( []( const item & i ) { return from( i.items ); } );
+
+	REQUIRE( *r++ == src[ 0 ].items[ 0 ] );
+	REQUIRE( *r++ == src[ 0 ].items[ 1 ] );
+	REQUIRE( *r++ == src[ 1 ].items[ 0 ] );
+	REQUIRE( *r++ == src[ 1 ].items[ 1 ] );
+	REQUIRE( *r++ == src[ 2 ].items[ 0 ] );
+	REQUIRE( *r++ == src[ 2 ].items[ 1 ] );
+	REQUIRE( !r );
 }
 
 
+/*
 TEST_CASE( "Reverse fails to compile for skip from infinite range", "[narl][reverse][skip][infinite]" )
 {
 	auto r = make_range< int >() | skip( 20 ) | reverse();
 	//REQUIRE( !r );
 }
-
+*/
 
 TEST_CASE( "Any returns true if any elements match", "[narl][any][expression][true]" )
 {

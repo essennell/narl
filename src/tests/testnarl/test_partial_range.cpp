@@ -16,7 +16,7 @@ TEST_CASE( "Partial range with taker is evaluated lazily", "[narl][partial_range
 	REQUIRE_THROWS_AS( ++r, range_access_exception );
 	REQUIRE_THROWS_AS( r++, range_access_exception );
 	REQUIRE_THROWS_AS( *r, range_access_exception );
-	REQUIRE_THROWS_AS( ( !r ), range_access_exception );
+	REQUIRE_THROWS_AS( r && true, range_access_exception );
 }
 
 
@@ -27,7 +27,7 @@ TEST_CASE( "Partial range with skipper is evaluated lazily", "[narl][partial_ran
 	REQUIRE_THROWS_AS( ++r, range_access_exception );
 	REQUIRE_THROWS_AS( r++, range_access_exception );
 	REQUIRE_THROWS_AS( *r, range_access_exception );
-	REQUIRE_THROWS_AS( ( !r ), range_access_exception );
+	REQUIRE_THROWS_AS( r && true, range_access_exception );
 }
 
 
@@ -96,7 +96,7 @@ TEST_CASE( "Partial range with skipping_while is evaluated lazily", "[narl][part
 	REQUIRE_THROWS_AS( ++r, range_access_exception );
 	REQUIRE_THROWS_AS( r++, range_access_exception );
 	REQUIRE_THROWS_AS( *r, range_access_exception );
-	REQUIRE_THROWS_AS( ( !r ), range_access_exception );
+	REQUIRE_THROWS_AS( r && true, range_access_exception );
 }
 
 
@@ -145,7 +145,7 @@ TEST_CASE( "Partial range with taking while is evaluated lazily", "[narl][partia
 	REQUIRE_THROWS_AS( ++r, range_access_exception );
 	REQUIRE_THROWS_AS( r++, range_access_exception );
 	REQUIRE_THROWS_AS( *r, range_access_exception );
-	REQUIRE_THROWS_AS( ( !r ), range_access_exception );
+	REQUIRE_THROWS_AS( r && true, range_access_exception );
 }
 
 

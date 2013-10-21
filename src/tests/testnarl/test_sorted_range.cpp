@@ -18,7 +18,7 @@ TEST_CASE( "Sorted range is lazily evaluated", "[narl][sorted][deferred]" )
 	REQUIRE_THROWS_AS( ++r, range_access_exception );
 	REQUIRE_THROWS_AS( r++, range_access_exception );
 	REQUIRE_THROWS_AS( *r, range_access_exception );
-	REQUIRE_THROWS_AS( ( !r ), range_access_exception );
+	REQUIRE_THROWS_AS( r && true, range_access_exception );
 }
 
 

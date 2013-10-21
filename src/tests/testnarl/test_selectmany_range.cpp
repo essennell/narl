@@ -18,7 +18,7 @@ TEST_CASE( "Select many range is lazy evaluated", "[narl][selectmany][lazy]" )
 	REQUIRE_THROWS_AS( r++, range_access_exception );
 	REQUIRE_THROWS_AS( --r, range_access_exception );
 	REQUIRE_THROWS_AS( r--, range_access_exception );
-	REQUIRE_THROWS_AS( !!r, range_access_exception );
+	REQUIRE_THROWS_AS( r && true, range_access_exception );
 }
 
 
@@ -71,4 +71,17 @@ TEST_CASE( "Select many range can be incremented from before begin for first ele
 	REQUIRE( !!r );
 	REQUIRE( *r == 2 );
 }
+
+
+TEST_CASE( "Select many range can return elements of external vector", "[narl][selectmany][externaldata]" )
+{
+	std::vector< int > data { 'a', 'b', 'c' };
+	auto r = make_test_range< selectmany_range >( from( { 1, 2, 3 } ), [&data]( int ) { return from( data ); } );
+
+	REQUIRE( *r++ == data[ 0 ] );
+	REQUIRE( *r++ == data[ 1 ] );
+	REQUIRE( *r++ == data[ 2 ] );
+}
+
+
 

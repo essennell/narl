@@ -18,7 +18,7 @@ TEST_CASE( "Distinct range is lazy evaluated", "[narl][distinct][lazy]" )
 	REQUIRE_THROWS_AS( --r, range_access_exception );
 	REQUIRE_THROWS_AS( r++, range_access_exception );
 	REQUIRE_THROWS_AS( r--, range_access_exception );
-	REQUIRE_THROWS_AS( !r, range_access_exception );
+	REQUIRE_THROWS_AS( r && true, range_access_exception );
 }
 
 

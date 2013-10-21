@@ -14,7 +14,7 @@ TEST_CASE( "Merging range is lazy evaluated", "[narl][merging_range][lazy]" )
 	auto r = make_test_range< merging_range >( throwing_range< int >(), from( { 1, 2, 4 } ), std::less< int >() );
 
 	REQUIRE_THROWS_AS( *r, range_access_exception );
-	REQUIRE_THROWS_AS( !r, range_access_exception );
+	REQUIRE_THROWS_AS( r && true, range_access_exception );
 	REQUIRE_THROWS_AS( ++r, range_access_exception );
 	REQUIRE_THROWS_AS( --r, range_access_exception );
 }

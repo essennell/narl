@@ -19,7 +19,7 @@ TEST_CASE( "Diffing range is lazy evaluated", "[narl][diffing_range][lazy]" )
 	REQUIRE_THROWS_AS( r1++, range_access_exception );
 	REQUIRE_THROWS_AS( r1--, range_access_exception );
 	REQUIRE_THROWS_AS( *r1, range_access_exception );
-	REQUIRE_THROWS_AS( !r1, range_access_exception );
+	REQUIRE_THROWS_AS( r1 && true, range_access_exception );
 	REQUIRE_THROWS_AS( r1.goto_end(), range_access_exception );
 
 	REQUIRE_THROWS_AS( ++r2, range_access_exception );
