@@ -391,6 +391,8 @@ TEST_CASE( "Reverse produces elements in reverse order from skip", "[narl][rever
 }
 
 
+#ifndef _MSC_VER
+
 TEST_CASE( "Select many produces flattened range of provided ranges", "[narl][selectmany]" )
 {
 	struct item
@@ -416,6 +418,7 @@ TEST_CASE( "Select many produces flattened range of provided ranges", "[narl][se
 	REQUIRE( !r );
 }
 
+#endif
 
 /*
 TEST_CASE( "Reverse fails to compile for skip from infinite range", "[narl][reverse][skip][infinite]" )
@@ -798,35 +801,38 @@ TEST_CASE( "Distinct range can be reversed", "[narl][distinct][reverse]" )
 }
 
 
+#ifndef _MSC_VER
+
 TEST_CASE( "Ranges can be joined to produce new types", "[narl][join]" )
 {
 	auto r1 = from( { 0, 1, 2, 3, 4 } ) | zipwith( from( { "Zero", "One", "Two", "Three", "Four" } ) );
 	auto r2 = from( { 1, 2, 3, 4, 5 } ) | zipwith( from( { 10.1, 20.2, 30.3, 40.4, 50.5 } ) ) ;
 
-	//typedef std::tuple< int, std::string > left;
-	//typedef std::tuple< int, double > right;
-	//typedef std::tuple< int, std::string, double > result;
+	typedef std::tuple< int, std::string > left;
+	typedef std::tuple< int, double > right;
+	typedef std::tuple< int, std::string, double > result;
 
-	//auto r = r1 | join( r2, 
-	//	[]( const left & l ) { return std::get< 0 >( l ); }, 
-	//	[]( const right & r ) { return std::get< 0 >( r ); }, 
-	//	[]( const left & l, const right & r ) 
-	//		{ return std::make_tuple( std::get< 0 >( l ), std::get< 1 >( l ), std::get< 1 >( r ) ); } );
+	auto r = r1 | join( r2, 
+		[]( const left & l ) { return std::get< 0 >( l ); }, 
+		[]( const right & r ) { return std::get< 0 >( r ); }, 
+		[]( const left & l, const right & r ) 
+			{ return std::make_tuple( std::get< 0 >( l ), std::get< 1 >( l ), std::get< 1 >( r ) ); } );
 
-	//std::vector< result > expected
-	//	{
-	//		std::make_tuple( 1, "One", 10.1 ),
-	//		std::make_tuple( 2, "Two", 20.2 ),
-	//		std::make_tuple( 3, "Three", 30.3 ),
-	//		std::make_tuple( 4, "Four", 40.4 ),
-	//	};
-	//for( const auto & v : expected )
-	//{
-	//	REQUIRE( v == *r++ );
-	//}
-	//REQUIRE( !r );
+	std::vector< result > expected
+		{
+			std::make_tuple( 1, "One", 10.1 ),
+			std::make_tuple( 2, "Two", 20.2 ),
+			std::make_tuple( 3, "Three", 30.3 ),
+			std::make_tuple( 4, "Four", 40.4 ),
+		};
+	for( const auto & v : expected )
+	{
+		REQUIRE( v == *r++ );
+	}
+	REQUIRE( !r );
 }
 
+#endif
 
 TEST_CASE( "Range can be used as default constructed local", "[narl][range][local]" )
 {

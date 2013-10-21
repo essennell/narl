@@ -73,6 +73,8 @@ TEST_CASE( "Select many range can be incremented from before begin for first ele
 }
 
 
+#ifndef _MSC_VER
+
 TEST_CASE( "Select many range can return elements of external vector", "[narl][selectmany][externaldata]" )
 {
 	std::vector< int > data { 'a', 'b', 'c' };
@@ -83,5 +85,5 @@ TEST_CASE( "Select many range can return elements of external vector", "[narl][s
 	REQUIRE( *r++ == data[ 2 ] );
 }
 
-
+#endif
 
