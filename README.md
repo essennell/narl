@@ -58,9 +58,11 @@ auto r = from( { 1, 2, 3 } )
 	// or to< std::vector >() for example
 ```
 
+## Usage
+
 The full list of implemented expressions is:
 
-[from](doc/range.md) [to](doc/range.md) [range](doc/range.md) [aggregate](doc/aggregate.md) [all](doc/anyall.md) [any](doc/anyall.md) [concat](doc/select.md) [count](doc/aggregate.md) [distinct](doc/setops.md) [except](doc/setops.md) [groupby](doc/groupby.md) [join](doc/groupby.md)* [intersect](doc/setops.md) [reverse](doc/select.md) [select](doc/select.md) [selectmany](doc/select.md) [sequenceequal](doc/aggregate.md) [skip](doc/skiptake.md) [skipwhile](doc/skiptake.md) [sorted](doc/select.md) [take](doc/skiptake.md) [takewhile](doc/skiptake.md) [union](doc/setops.md) [zip](doc/select.md)
+[from](doc/range.md#from) [to](doc/range.md#to) [range](doc/range.md#range) [aggregate](doc/aggregate.md#aggregate) [all](doc/anyall.md#all) [any](doc/anyall.md#any) [concat](doc/select.md#concat) [count](doc/aggregate.md#count) [distinct](doc/setops.md#distinct) [except](doc/setops.md#except) [groupby](doc/groupby.md#groupby) [join](doc/groupby.md#join)* [intersect_with](doc/setops.md#intersect_with) [reverse](doc/select.md#reverse) [select](doc/select.md#select) [selectmany](doc/select.md#selectmany) [sequenceequal](doc/aggregate.md#sequenceequal) [skip](doc/skiptake.md#skip) [skipwhile](doc/skiptake.md#skipwhile) [sorted](doc/select.md#sorted) [take](doc/skiptake.md#take) [takewhile](doc/skiptake.md#takewhile) [union_with](doc/setops.md#union_with) [zipwith](doc/select.md#zipwith)
 
 (*join does not work in VS2013)
 

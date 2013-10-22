@@ -9,5 +9,6 @@
 ## takewhile
 
 
-[HOME](../README.md)
+[Home](../README.md)
+[Index](../README.md#Usage)
 

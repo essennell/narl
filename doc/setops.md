@@ -64,5 +64,6 @@ auto both = from( { 1, 2, 2, 3, 4 } ) | union_with( from( { 2, 4, 4, 8 } ) );
 // Produces { 1, 2, 2, 3, 4, 4, 8 }
 ```
 
-[HOME](../README.md)
+[Home](../README.md)
+[Index](../README.md#Usage)
 

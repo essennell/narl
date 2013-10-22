@@ -27,4 +27,5 @@ This operation is in this section only because it is a variation of a fold that 
 auto same = from( { 1, 2, 3 } ) | sequenceequal( from( { 1, 2, 3 } ) );
 ```
 
-[HOME](../README.md)
+[Home](../README.md)
+[Index](../README.md#Usage)

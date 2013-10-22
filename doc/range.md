@@ -44,6 +44,7 @@ auto v = r | to< std::vector >();
 auto l = r | to< std::list >();
 auto d = r | to< std::deque >();
 auto f = r | to< std::forward_list >();
+```
 
 ## range
 
@@ -68,3 +69,4 @@ std::cout << "\n";
 ```
 
 [Home](../README.md)
+[Index](../README.md#Usage)

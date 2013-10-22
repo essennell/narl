@@ -25,3 +25,4 @@ bool odd = !( from( { 2, 4, 6 } ) | any( []( int i ) { return i % 2 != 0; } ) );
 ```
 
 [Home](../README.md)
+[Index](../README.md#Usage)

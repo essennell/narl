@@ -84,4 +84,5 @@ auto zipped_n = from( { 1, 2, 3 } ) | zipwith( from( { "1", "2", "3" } ), from( 
 
 ```
 
-[HOME](../README.md)
+[Home](../README.md)
+[Index](../README.md#Usage)
