@@ -1,7 +1,6 @@
 # narl
 
-Not Another Range Library - Overload at [ACCU](http://accu.org):
-[Range and Elevation](http://accu.org/var/uploads/journals/Overload117.pdf)
+Not Another Range Library - Overload at [ACCU](http://accu.org): an article introducing the library - [Range and Elevation](http://accu.org/var/uploads/journals/Overload117.pdf)
 
 #Get started
 
@@ -61,7 +60,7 @@ auto r = from( { 1, 2, 3 } )
 
 The full list of implemented expressions is:
 
-[aggregate](doc/aggregate.md) [all](doc/anyall.md) [any](doc/anyall.md) [concat](doc/select.md) [count](doc/aggregate.md) [distinct](doc/setops.md) [except](doc/setops.md) [groupby](doc/groupby.md) [join](doc/groupby.md)* [intersect](doc/setops.md) [reverse](doc/select.md) [select](doc/select.md) [selectmany](doc/select.md) [sequenceequal](doc/aggregate.md) [skip](doc/skiptake.md) [skipwhile](doc/skiptake.md) [sorted](doc/select.md) [take](doc/skiptake.md) [takewhile](doc/skiptake.md) [union](doc/setops.md) [zip](doc/select.md)
+[from](doc/range.md) [to](doc/range.md) [range](doc/range.md) [aggregate](doc/aggregate.md) [all](doc/anyall.md) [any](doc/anyall.md) [concat](doc/select.md) [count](doc/aggregate.md) [distinct](doc/setops.md) [except](doc/setops.md) [groupby](doc/groupby.md) [join](doc/groupby.md)* [intersect](doc/setops.md) [reverse](doc/select.md) [select](doc/select.md) [selectmany](doc/select.md) [sequenceequal](doc/aggregate.md) [skip](doc/skiptake.md) [skipwhile](doc/skiptake.md) [sorted](doc/select.md) [take](doc/skiptake.md) [takewhile](doc/skiptake.md) [union](doc/setops.md) [zip](doc/select.md)
 
 (*join does not work in VS2013)
 

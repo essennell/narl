@@ -6,6 +6,8 @@
 #include <narl.h>
 
 #include <array>
+#include <deque>
+#include <forward_list>
 #include <list>
 #include <string>
 #include <vector>
@@ -922,6 +924,26 @@ TEST_CASE( "Range can be used to create a list", "[narl][range][container][list]
 	auto v = r | to< std::list >();
 
 	REQUIRE( std::equal( std::begin( src ), std::end( src ), std::begin( v ) ) );
+}
+
+
+TEST_CASE( "Range can be used to create a deque", "[narl][range][container][deque]" )
+{
+	std::vector< int > src { 2, 4, 8 };
+	auto r = from( src );
+	auto d = r | to< std::deque >();
+
+	REQUIRE( std::equal( std::begin( src ), std::end( src ), std::begin( d ) ) );
+}
+
+
+TEST_CASE( "Range can be used to create a forward list", "[narl][range][container][forward_list]" )
+{
+	std::vector< char > src { 'a', 'b', 'c' };
+	auto r = from( src );
+	auto d = r | to< std::forward_list >();
+
+	REQUIRE( std::equal( std::begin( src ), std::end( src ), std::begin( d ) ) );
 }
 
 
