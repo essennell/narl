@@ -391,12 +391,32 @@ TEST_CASE( "Reverse produces elements in reverse order from skip", "[narl][rever
 }
 
 
-#ifndef _MSC_VER
-
 TEST_CASE( "Select many produces flattened range of provided ranges", "[narl][selectmany]" )
 {
 	struct item
 	{
+		item() { }
+		item( int id, std::vector< int > && i ) : id( id ), items{ std::move( i ) } { }
+		item( const item & other ) 
+			: id( other.id ), items( other.items ) 
+		{ }
+		item( item && other ) 
+			: id( other.id ), items( std::move( other.items ) ) 
+		{ }
+		item & operator=( const item & other ) 
+		{ 
+			item tmp{ other };
+			std::swap( id, tmp.id );
+			std::swap( items, tmp.items );
+			return *this;
+		}
+		item & operator=( item && other )
+		{
+			id = std::move( other.id );
+			items = std::move( other.items );
+			return *this;
+		}
+
 		int id;
 		std::vector< int > items;
 	};
@@ -418,7 +438,6 @@ TEST_CASE( "Select many produces flattened range of provided ranges", "[narl][se
 	REQUIRE( !r );
 }
 
-#endif
 
 /*
 TEST_CASE( "Reverse fails to compile for skip from infinite range", "[narl][reverse][skip][infinite]" )
@@ -800,8 +819,7 @@ TEST_CASE( "Distinct range can be reversed", "[narl][distinct][reverse]" )
 	REQUIRE( !r );
 }
 
-
-#ifndef _MSC_VER
+#ifndef _MSC_VER2
 
 TEST_CASE( "Ranges can be joined to produce new types", "[narl][join]" )
 {

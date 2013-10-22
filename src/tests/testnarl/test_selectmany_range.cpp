@@ -73,7 +73,7 @@ TEST_CASE( "Select many range can be incremented from before begin for first ele
 }
 
 
-#ifndef _MSC_VER
+#ifndef _MSC_VER2
 
 TEST_CASE( "Select many range can return elements of external vector", "[narl][selectmany][externaldata]" )
 {
@@ -83,6 +83,13 @@ TEST_CASE( "Select many range can return elements of external vector", "[narl][s
 	REQUIRE( *r++ == data[ 0 ] );
 	REQUIRE( *r++ == data[ 1 ] );
 	REQUIRE( *r++ == data[ 2 ] );
+	REQUIRE( *r++ == data[ 0 ] );
+	REQUIRE( *r++ == data[ 1 ] );
+	REQUIRE( *r++ == data[ 2 ] );
+	REQUIRE( *r++ == data[ 0 ] );
+	REQUIRE( *r++ == data[ 1 ] );
+	REQUIRE( *r++ == data[ 2 ] );
+	REQUIRE( !r );
 }
 
 #endif

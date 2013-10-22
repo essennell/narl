@@ -20,6 +20,11 @@ namespace narl
 			{
 			}
 
+			range( range && other )
+				: r{ std::move( other.r ) }
+			{
+			}
+
 			template< typename range_type >
 			range( const range_type & other )
 				: r{ std::unique_ptr< range_wrapper< range_type > >{ new range_wrapper< range_type >{ other } } }
@@ -31,6 +36,12 @@ namespace narl
 			{
 				range tmp{ other };
 				tmp.r.swap( r );
+				return *this;
+			}
+
+			auto operator=( range && other ) -> range &
+			{
+				r = std::move( other.r );
 				return *this;
 			}
 
