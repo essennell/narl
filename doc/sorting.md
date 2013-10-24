@@ -33,5 +33,15 @@ auto r = left | merge( from( { 2, 3, 4, 5, 6, 7, 8 } ) );
 //Produces { 1, 2, 3, 4, 5, 6, 7, 8, 16 }
 ```
 
+## reverse
+
+Does exactly what it says on the tin - produces the elements of the input range in reverse order. Notably, this operation does **not** buffer the input - it is a streaming operation.
+
+```c++
+auto reversed = from( { 1, 2, 3 } ) | reverse()
+
+// Produces { 3, 2, 1 }
+```
+
 [Home](../README.md)
 [Index](../README.md#Usage)
