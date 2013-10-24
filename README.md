@@ -9,6 +9,9 @@ Narl is a header-only library for C++. You'll need gcc 4.8 or better, or MS Visu
 Add the ```src/narl``` folder to you search path and include ```<narl.h>```.
 
 The library is based around the idea of Ranges, but for the most part, these aren't directly used. Instead, you compose expressions from Narl, and let the compiler figure out what the result is. 
+
+There are lots of expressions which you can compose together, using the | operator. Here is a simple filtering expression:
+
 For example:
 
 ```c++
@@ -24,7 +27,8 @@ int main( int argc, char *const argv[] )
 {
 	std::vector< std::string > v { argv, argv + argc };
 
-	auto r = from( v );
+	auto r = from( src ) | where( []( const item & i ) { return i.size() > 0; } );
+
 	for( auto const & arg : r )
 	{
 		std::cout << arg;
@@ -33,12 +37,6 @@ int main( int argc, char *const argv[] )
 ```
 
 You can use initializer lists to initialize a range too: ```from( { 1, 2, 3 } )```.
-
-There are lots of expressions which you can compose together, using the | operator. Here is a simple filtering expression:
-
-```c++
-auto r = from( src ) | where( []( const item & i ) { return i.size() > 0; } );
-```
 
 Expressions can be arbitrarily complex, and are lazily evaluated left-to-right:
 
