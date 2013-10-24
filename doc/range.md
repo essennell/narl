@@ -46,6 +46,37 @@ auto d = r | to< std::deque >();
 auto f = r | to< std::forward_list >();
 ```
 
+## make_range
+
+This is an one of two alternate ways to make a range, and has three overloads.
+(1) makes a default range from a type, which must support ```++``` to get the next value. This produces (effectively) an infinite range.
+(2) is the same type of default range, but begins at a provided value
+
+```c++
+auto def = make_range< int >();
+auto init = make_range< int >( 5 );
+
+// def Produces { 0, 1, 2, 3, ... std::numeric_limits< int >::max}
+// init produces { 5, 6, 7, ... std::numeric_limits< int >::max}
+```
+(3) This third overload can be used to provide a completely user-defined range. Whenever the resulting range is incremented (using ```++```), the callback is invoked to get the next item. The previous value is passed to callback function. An initial value is passed in to the ```make_range``` function.
+
+```c++
+auto custom = make_range< int >( 2, []( int i ) { return i + 5; } );
+
+// Produces { 2, 10, 50, 2500, ... }
+```
+
+## fill_range
+
+This is a variant of ```make_range``` which fills a range of given type with a single value.
+
+```c++
+auto r = fill_range< int >( 128 );
+
+// Produces { 128, 128, 128, ... }
+```
+
 ## range
 
 There is limited support for a local named variable of ```range``` type that can be used to refer to any range object. It supports all the operations of the basic ranges (```*```, ```++```, ```--``` and conversion to ```bool```).
