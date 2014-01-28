@@ -21,11 +21,12 @@ namespace narl
 			{
 				if( !r )
 					o.goto_end();
+				//if( r && o && !cmp( *r, *o ) )
 				while( r && o && !cmp( *r, *o ) )
 				{
-					if( r && o && !cmp( *o, *r ) )
+					if( !cmp( *o, *r ) )
 						++r;
-					if( r && o && !cmp( *r, *o ) )
+					if( r && !cmp( *r, *o ) )
 						++o;
 				}
 			}
@@ -36,9 +37,9 @@ namespace narl
 					--o;
 				while( r && o && !cmp( *o, *r ) )
 				{
-					if( r && o && !cmp( *r, *o ) )
+					if( !cmp( *r, *o ) )
 						--r;
-					if( r && o && !cmp( *o, *r ) )
+					if( r && !cmp( *o, *r ) )
 						--o;
 				}
 			}

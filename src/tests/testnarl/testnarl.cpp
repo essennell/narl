@@ -39,7 +39,7 @@ TEST_CASE( "Range can be initialised from temp container", "[narl][container][te
 	REQUIRE( *r++ == 1 );
 	REQUIRE( *r++ == 2 );
 	REQUIRE( *r++ == 3 );
-	REQUIRE( !r );
+	REQUIRE_FALSE( r );
 }
 
 
@@ -54,7 +54,7 @@ TEST_CASE( "Range can be initialised from named init list", "[narl][init_list][r
 		REQUIRE( *r++ == 1 );
 		REQUIRE( *r++ == 2 );
 		REQUIRE( *r++ == 3 );
-		REQUIRE( !r );
+		REQUIRE_FALSE( r );
 	}
 	REQUIRE( std::equal( std::begin( data ), std::end( data ), std::begin( original ) ) );
 }
@@ -154,7 +154,7 @@ TEST_CASE( "Range generated produces an incrementing range for int", "[narl][gen
 	REQUIRE( *r++ == 3 );
 	REQUIRE( *r++ == 4 );
 
-	REQUIRE( !!r );
+	REQUIRE_FALSE( !r );
 }
 
 
@@ -784,7 +784,14 @@ TEST_CASE( "Count produces zero for invalid range", "[narl][count][empty]" )
 
 TEST_CASE( "Count of a filtered range only counts matches", "[narl][count][where]" )
 {
-	auto r = from( { 1, 2, 3, 4, 5 } ) | where( []( int i ) { return i % 2 != 0; } ) | count();
+	auto r = from( { 0, 1, 2, 3, 4, 5 } ) | where( []( int i ) { return i % 2 == 0; } ) | count();
+	REQUIRE( r == 3 );
+}
+
+TEST_CASE( "Count of a multi-level range counts matches", "[narl][count][where]" )
+{
+	auto r = from( { 0, 1, 2, 3, 4, 5 } ) | where( []( int i ) { return i > 2; } ) | select( []( int i ) { return i * 2; } ) | count();
+	
 	REQUIRE( r == 3 );
 }
 

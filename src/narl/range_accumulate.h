@@ -86,8 +86,9 @@ namespace narl
 			auto value() const -> unsigned
 			{
 				unsigned c = 0;
-				while( r++ )
-					++c;
+				if( r )
+					while( r++ )
+						++c;
 				return c;
 			}
 

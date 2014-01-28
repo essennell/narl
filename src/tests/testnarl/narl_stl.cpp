@@ -110,10 +110,10 @@ TEST_CASE( "count_if", "[narl][stl][count_if]" )
 {
 	std::vector< int > data { 2, 4, 6 };
 
-	auto stl_result = std::count_if( std::begin( data ), std::end( data ), []( int i ) { return i < 5; } );
+	auto stl_result = std::count_if( std::begin( data ), std::end( data ), []( int i ) { return i > 5; } );
 
 	auto narl_result = from( data ) 
-		| where( []( int i ) { return i < 5; } ) 
+		| where( []( int i ) { return i > 5; } ) 
 		| count();
 
 	REQUIRE( narl_result == stl_result );
