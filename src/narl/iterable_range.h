@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstring>
 #include <initializer_list>
 #include <memory>
 #include <stdexcept>
@@ -223,4 +224,10 @@ namespace narl
 			{ std::move( src ) };
 	}
 
+	inline auto from( const char * const src )
+		-> iterable_range< const char * , char >
+	{
+		return iterable_range< const char * , char >
+			{ src, src + std::strlen( src ) };
+	}
 }

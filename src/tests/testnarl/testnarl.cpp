@@ -87,6 +87,20 @@ TEST_CASE( "Range can be initialised from array", "[narl][array]" )
 }
 
 
+TEST_CASE( "Range can be initialised from char pointer", "[narl][ptr]" )
+{
+	const char * const str = "foo";
+	std::string original{ str };
+
+	auto r = from( str );
+
+	REQUIRE( *r++ == original[ 0 ] );
+	REQUIRE( *r++ == original[ 1 ] );
+	REQUIRE( *r++ == original[ 2 ] );
+	REQUIRE_FALSE( r );
+}
+
+
 TEST_CASE( "Range operates with range-based for", "[narl][range_for]" )
 {
 	std::vector< int > src { 1, 2, 3 };

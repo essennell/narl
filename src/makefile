@@ -89,13 +89,11 @@ testnarl.exe: $(OBJS)
 
 include $(OBJS:.o=.d)
 
-$(OBJDIR):
-	-mkdir $(OBJDIR)
-
 $(OBJDIR)/%.o: $(SRCDIR)/%.cpp 
 	$(CC) $(CPPFLAGS) -c -o $@ $< $(INCLUDE)
 
 $(OBJDIR)/%.d: $(SRCDIR)/%.cpp
+	-mkdir $(OBJDIR)
 	@set -e; rm -f $@; \
 	$(CC) -MM $(CPPFLAGS) $(INCLUDE) $< > $@.$$$$; \
 	sed 's,\($*\)\.o[ :]*,$(OBJDIR)/\1.o $@ : ,g' < $@.$$$$ > $@; \
