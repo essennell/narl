@@ -99,5 +99,20 @@ for( auto i : r )
 std::cout << "\n";
 ```
 
+## cycle
+
+Given an input range, produce an infinite range by cycling its contents, i.e. when iterating the range reaches the end, re-start at the beginning
+
+```c++
+auto r = from( { 1, 2, 3 } ) | cycle() | take( 5 );
+for( auto i : r )
+{
+	std::cout << i << ":";
+}
+std::cout << "\n";
+
+// 1:2:3:1:2
+```
+
 [Home](../README.md)
 [Index](../README.md#Usage)

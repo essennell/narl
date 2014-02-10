@@ -46,6 +46,7 @@ SRCDIR=tests/testnarl
 
 OBJS=	$(OBJDIR)/testnarl.o \
 		$(OBJDIR)/test_concatenating_range.o \
+		$(OBJDIR)/test_cycling_range.o \
 		$(OBJDIR)/test_diffing_range.o \
 		$(OBJDIR)/test_distinct_range.o \
 		$(OBJDIR)/test_filtering_range.o \

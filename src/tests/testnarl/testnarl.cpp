@@ -982,3 +982,22 @@ TEST_CASE( "Merge produces a sorted range from 2 input ranges", "[narl][merge]" 
 }
 
 
+TEST_CASE( "Cycling range can be used with take to produce correct number", "[narl][cycle][take]" )
+{
+	auto r = from( { 1, 2, 3 } ) | cycle() | take( 5 ) | to< std::vector >();
+	std::vector< int > expected { 1, 2, 3, 1, 2 };
+
+	REQUIRE( std::equal( std::begin( r ), std::end( r ), std::begin( expected ) ) );
+	REQUIRE( std::equal( std::begin( expected ), std::end( expected ), std::begin( r ) ) );
+}
+
+
+TEST_CASE( "Reversed cycled range used with take produce correct number in reverse", "[narl][reverse][cycle][take]" )
+{
+	auto r = from( { 1, 2, 3 } ) | reverse() | cycle() | take( 5 ) | to< std::vector >();
+
+	std::vector< int > expected { 3, 2, 1, 3, 2 };
+
+	REQUIRE( std::equal( std::begin( r ), std::end( r ), std::begin( expected ) ) );
+	REQUIRE( std::equal( std::begin( expected ), std::end( expected ), std::begin( r ) ) );
+}
