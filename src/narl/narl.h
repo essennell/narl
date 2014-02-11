@@ -1,6 +1,7 @@
 #pragma once
 
 #include "concatenating_range.h"
+#include "cycling_range.h"
 #include "diffing_range.h"
 #include "distinct_range.h"
 #include "filtering_range.h"
