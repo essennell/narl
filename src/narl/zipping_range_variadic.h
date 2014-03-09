@@ -21,7 +21,7 @@ namespace narl
 
 
 		public:
-			zipping_range( const range_type & r, const other_range_type & other )
+			zipping_range( range_type r, other_range_type other )
 				: r{ r }, other{ other }
 			{
 			}
@@ -85,7 +85,7 @@ namespace narl
 
 
 		public:
-			zipping_range( const range_type r, const others &... rest )
+			zipping_range( range_type r, others... rest )
 				: base{ rest... }, r{ r }, before_begin{ false }
 			{
 			}
@@ -147,7 +147,7 @@ namespace narl
 
 
 	template< typename... range_type >
-	auto zipwith( const range_type &... r ) -> decltype( make_factory< zipping_range >( r... ) )
+	auto zipwith( range_type... r ) -> decltype( make_factory< zipping_range >( r... ) )
 	{
 		return make_factory< zipping_range >( r... );
 	}

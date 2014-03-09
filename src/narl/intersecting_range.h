@@ -42,7 +42,7 @@ namespace narl
 
 
 		public:
-			intersecting_range( const range_type & r, const other_range & o, comparer cmp )
+			intersecting_range( range_type r, other_range o, comparer cmp )
 				: r{ r }, o{ o }, cmp( cmp )
 			{
 			}
@@ -105,7 +105,7 @@ namespace narl
 	{
 
 		public:
-			intersecting_range_default( const range_type & r, const other_range & other )
+			intersecting_range_default( range_type r, other_range other )
 				: intersecting_range< range_type, other_range, std::less< decltype( *r ) > >( r, other, std::less< decltype( *r ) >() )
 			{
 			}
@@ -114,14 +114,14 @@ namespace narl
 
 
 	template< typename range_type, typename comparer >
-	auto intersect_with( const range_type & r, const comparer & cmp ) 
+	auto intersect_with( range_type r, comparer cmp ) 
 		-> decltype( make_factory< intersecting_range >( r, cmp ) )
 	{
 		return make_factory< intersecting_range >( r, cmp );
 	}
 
 	template< typename range_type >
-	auto intersect_with( const range_type & r ) 
+	auto intersect_with( range_type r ) 
 		-> decltype( make_factory< intersecting_range_default >( r ) )
 	{
 		return make_factory< intersecting_range_default >( r );

@@ -12,18 +12,18 @@ namespace narl
 	{
 
 		public:
-			range_input_iterator( const range_type & r )
+			range_input_iterator( range_type r )
 				: r{ r }
 			{
 			}
 
 
-			auto operator!=( const range_input_iterator & r ) const -> bool
+			auto operator!=( range_input_iterator r ) const -> bool
 			{
 				return !operator==( r );
 			}
 
-			auto operator==( const range_input_iterator & ) const -> bool
+			auto operator==( range_input_iterator ) const -> bool
 			{
 				return !r;
 			}
@@ -47,13 +47,13 @@ namespace narl
 
 
 	template< typename range_type >
-	auto begin( const range_type & r ) -> range_input_iterator< range_type, decltype( *r ) >
+	auto begin( range_type r ) -> range_input_iterator< range_type, decltype( *r ) >
 	{
 		return range_input_iterator< range_type, decltype( *r ) >{ r };
 	}
 
 	template< typename range_type >
-	auto end( const range_type & r ) -> range_input_iterator< range_type, decltype( *r ) >
+	auto end( range_type r ) -> range_input_iterator< range_type, decltype( *r ) >
 	{
 		return range_input_iterator< range_type, decltype( *r ) >{ r };
 	}

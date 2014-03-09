@@ -18,8 +18,14 @@
       <Platform>x64</Platform>
     </ProjectConfiguration>
   </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="tests\perf\narl_speed.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="tests\perf\selectwhere.h" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{A4A9CE62-FEA4-4FB2-8093-1C91ADC278F8}</ProjectGuid>
+    <ProjectGuid>{29CF8510-5FC9-413D-995E-249E9E83B1A9}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -74,22 +80,26 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>true</LinkIncremental>
+    <IncludePath>$(IncludePath)</IncludePath>
+    <LibraryPath>$(WindowsSDK_LibraryPath_x86);$(LibraryPath)</LibraryPath>
     <OutDir>$(SolutionDir)$(ProjectName)$(Platform)\$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)$(ProjectName)$(Platform)\$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>true</LinkIncremental>
+    <IncludePath>$(IncludePath)</IncludePath>
+    <LibraryPath>$(LibraryPath)</LibraryPath>
     <OutDir>$(SolutionDir)$(ProjectName)$(Platform)\$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)$(ProjectName)$(Platform)\$(Configuration)\</IntDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;_ITERATOR_DEBUG_LEVEL=0;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;_CONSOLE;_ITERATOR_DEBUG_LEVEL=0;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <WarningLevel>Level4</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..\externals\catch\single_include;narl</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\externals\catch\single_include;narl;D:\work\dev\lib\boost_1_55_0</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
@@ -105,7 +115,7 @@
       <WarningLevel>Level4</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..\externals\catch\single_include;narl</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\externals\catch\single_include;narl;D:\work\dev\lib\boost_1_55_0</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
@@ -119,7 +129,7 @@
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <WarningLevel>Level4</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
-      <AdditionalIncludeDirectories>..\externals\catch\single_include;narl</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\externals\catch\single_include;narl;D:\work\dev\lib\boost_1_55_0</AdditionalIncludeDirectories>
       <Optimization>Full</Optimization>
     </ClCompile>
     <Link>
@@ -136,7 +146,7 @@
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <WarningLevel>Level4</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
-      <AdditionalIncludeDirectories>..\externals\catch\single_include;narl</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\externals\catch\single_include;narl;D:\work\dev\lib\boost_1_55_0</AdditionalIncludeDirectories>
       <Optimization>Full</Optimization>
     </ClCompile>
     <Link>
@@ -146,62 +156,6 @@
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
   </ItemDefinitionGroup>
-  <ItemGroup>
-    <ClInclude Include="narl\concatenating_range.h" />
-    <ClInclude Include="narl\cycling_range.h" />
-    <ClInclude Include="narl\diffing_range.h" />
-    <ClInclude Include="narl\distinct_range.h" />
-    <ClInclude Include="narl\filtering_range.h" />
-    <ClInclude Include="narl\grouping_range.h" />
-    <ClInclude Include="narl\intersecting_range.h" />
-    <ClInclude Include="narl\iterable_range.h" />
-    <ClInclude Include="narl\joined_range.h" />
-    <ClInclude Include="narl\merging_range.h" />
-    <ClInclude Include="narl\narl.h" />
-    <ClInclude Include="narl\partial_range.h" />
-    <ClInclude Include="narl\range.h" />
-    <ClInclude Include="narl\range_accumulate.h" />
-    <ClInclude Include="narl\range_factory.h" />
-    <ClInclude Include="narl\range_generator.h" />
-    <ClInclude Include="narl\range_input_iterator.h" />
-    <ClInclude Include="narl\range_predicate.h" />
-    <ClInclude Include="narl\range_tocontainer.h" />
-    <ClInclude Include="narl\reversed_range.h" />
-    <ClInclude Include="narl\selectmany_range.h" />
-    <ClInclude Include="narl\sorted_range.h" />
-    <ClInclude Include="narl\transforming_range.h" />
-    <ClInclude Include="narl\unioning_range.h" />
-    <ClInclude Include="narl\zipping_range.h" />
-    <ClInclude Include="narl\zipping_range_non_variadic.h" />
-    <ClInclude Include="narl\zipping_range_variadic.h" />
-    <ClInclude Include="tests\testnarl\testnarl.h" />
-    <ClInclude Include="tests\testnarl\throwing_range.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="tests\testnarl\narl_stl.cpp" />
-    <ClCompile Include="tests\testnarl\testnarl.cpp" />
-    <ClCompile Include="tests\testnarl\test_concatenating_range.cpp" />
-    <ClCompile Include="tests\testnarl\test_diffing_range.cpp" />
-    <ClCompile Include="tests\testnarl\test_distinct_range.cpp" />
-    <ClCompile Include="tests\testnarl\test_filtering_range.cpp" />
-    <ClCompile Include="tests\testnarl\test_grouping_range.cpp" />
-    <ClCompile Include="tests\testnarl\test_intersecting_range.cpp" />
-    <ClCompile Include="tests\testnarl\test_iterable_range.cpp" />
-    <ClCompile Include="tests\testnarl\test_joined_range.cpp" />
-    <ClCompile Include="tests\testnarl\test_merging_range.cpp" />
-    <ClCompile Include="tests\testnarl\test_partial_range.cpp" />
-    <ClCompile Include="tests\testnarl\test_range_accumulate.cpp" />
-    <ClCompile Include="tests\testnarl\test_range_factory.cpp" />
-    <ClCompile Include="tests\testnarl\test_range_generator.cpp" />
-    <ClCompile Include="tests\testnarl\test_range_predicate.cpp" />
-    <ClCompile Include="tests\testnarl\test_reversed_range.cpp" />
-    <ClCompile Include="tests\testnarl\test_selectmany_range.cpp" />
-    <ClCompile Include="tests\testnarl\test_sorted_range.cpp" />
-    <ClCompile Include="tests\testnarl\test_tocontainer_range.cpp" />
-    <ClCompile Include="tests\testnarl\test_transforming_range.cpp" />
-    <ClCompile Include="tests\testnarl\test_unioning_range.cpp" />
-    <ClCompile Include="tests\testnarl\test_zipped_range.cpp" />
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

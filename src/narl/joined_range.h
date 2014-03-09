@@ -47,7 +47,7 @@ namespace narl
 
 
 		public:
-			joined_range( const inner_range & r, const outer_range & o, const inner_key_selector & inner, const outer_key_selector outer, const transformation & expr, const key_comparer cmp )
+			joined_range( inner_range r, outer_range o, inner_key_selector inner, outer_key_selector outer, transformation expr, key_comparer cmp )
 				: r{ r }, old_r{ r }, o{ o }, reset_r{ false }, inner( inner ), outer( outer ), expr( expr ), cmp( cmp )
 			{
 			}
@@ -160,7 +160,7 @@ namespace narl
 	{
 
 		public:
-			joined_range_default( const inner_range & r, const outer_range & o, const inner_key_selector & inner, const outer_key_selector & outer, const transformation t )
+			joined_range_default( inner_range r, outer_range o, inner_key_selector inner, outer_key_selector outer, transformation t )
 				: joined_range< inner_range, outer_range, inner_key_selector, outer_key_selector, transformation, join_cmp >( r, o, inner, outer, t, join_cmp() )
 			{
 			}
@@ -168,7 +168,7 @@ namespace narl
 	};
 
 	template< typename outer_range, typename inner_key_selector, typename outer_key_selector, typename transformation >
-	auto join( const outer_range & o, const inner_key_selector & inner, const outer_key_selector & outer, const transformation & t ) -> decltype( make_factory< joined_range_default >( o, inner, outer, t ) )
+	auto join( outer_range o, inner_key_selector inner, outer_key_selector outer, transformation t ) -> decltype( make_factory< joined_range_default >( o, inner, outer, t ) )
 	{
 		return make_factory< joined_range_default >( o, inner, outer, t );
 	}

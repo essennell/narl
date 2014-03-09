@@ -27,7 +27,7 @@ namespace narl
 			}
 
 		public:
-			filtering_range( const range_type & r, const predicate & filter )
+			filtering_range( range_type r, predicate filter )
 				: r{ r }, filter( filter )
 			{
 			}
@@ -84,7 +84,7 @@ namespace narl
 
 	
 	template< typename expression >
-	auto where( const expression & expr ) -> decltype( make_factory< filtering_range >( expr ) )
+	auto where( expression expr ) -> decltype( make_factory< filtering_range >( expr ) )
 	{
 		return make_factory< filtering_range >( expr );
 	}

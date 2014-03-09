@@ -19,7 +19,7 @@ namespace narl
 
 
 		public:
-			range_accumulate( const range_type & r, const seed & initial, const accumulator & a )
+			range_accumulate( range_type r, seed initial, accumulator a )
 				: r{ r }, initial{ initial }, a( a )
 			{
 			}
@@ -48,7 +48,7 @@ namespace narl
 
 
 		public:
-			range_default_accumulate( const range_type & r, const accumulator & a )
+			range_default_accumulate( range_type r, accumulator a )
 				: r{ r }, a( a )
 			{
 			}
@@ -77,7 +77,7 @@ namespace narl
 
 
 		public:
-			range_counter( const range_type & r )
+			range_counter( range_type r )
 				: r{ r }
 			{
 			}
@@ -96,13 +96,13 @@ namespace narl
 
 
 	template< typename seed, typename accumulator >
-	auto aggregate( const seed & initial, const accumulator & expr ) -> decltype( make_factory< range_accumulate >( initial, expr ) )
+	auto aggregate( seed initial, accumulator expr ) -> decltype( make_factory< range_accumulate >( initial, expr ) )
 	{
 		return make_factory< range_accumulate >( initial, expr );
 	}
 
 	template< typename accumulator >
-	auto aggregate( const accumulator & expr ) -> decltype( make_factory< range_default_accumulate >( expr ) )
+	auto aggregate( accumulator expr ) -> decltype( make_factory< range_default_accumulate >( expr ) )
 	{
 		return make_factory< range_default_accumulate >( expr );
 	}

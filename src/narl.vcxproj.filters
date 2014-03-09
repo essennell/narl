@@ -18,9 +18,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="tests\testnarl\throwing_range.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="narl\transforming_range.h">
       <Filter>narl</Filter>
     </ClInclude>
@@ -35,9 +32,6 @@
     </ClInclude>
     <ClInclude Include="narl\iterable_range.h">
       <Filter>narl</Filter>
-    </ClInclude>
-    <ClInclude Include="tests\testnarl\testnarl.h">
-      <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="narl\filtering_range.h">
       <Filter>narl</Filter>
@@ -78,29 +72,38 @@
     <ClInclude Include="narl\unioning_range.h">
       <Filter>narl</Filter>
     </ClInclude>
-    <ClInclude Include="narl\range.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="narl\cycling_range.h">
+      <Filter>narl</Filter>
     </ClInclude>
     <ClInclude Include="narl\distinct_range.h">
-      <Filter>Header Files</Filter>
+      <Filter>narl</Filter>
     </ClInclude>
     <ClInclude Include="narl\joined_range.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="narl\selectmany_range.h">
-      <Filter>Header Files</Filter>
+      <Filter>narl</Filter>
     </ClInclude>
     <ClInclude Include="narl\merging_range.h">
-      <Filter>Header Files</Filter>
+      <Filter>narl</Filter>
+    </ClInclude>
+    <ClInclude Include="narl\range.h">
+      <Filter>narl</Filter>
     </ClInclude>
     <ClInclude Include="narl\range_tocontainer.h">
-      <Filter>Header Files</Filter>
+      <Filter>narl</Filter>
+    </ClInclude>
+    <ClInclude Include="narl\selectmany_range.h">
+      <Filter>narl</Filter>
+    </ClInclude>
+    <ClInclude Include="tests\testnarl\testnarl.h">
+      <Filter>narl</Filter>
+    </ClInclude>
+    <ClInclude Include="tests\testnarl\throwing_range.h">
+      <Filter>narl</Filter>
     </ClInclude>
     <ClInclude Include="narl\zipping_range_non_variadic.h">
-      <Filter>Header Files</Filter>
+      <Filter>narl</Filter>
     </ClInclude>
     <ClInclude Include="narl\zipping_range_variadic.h">
-      <Filter>Header Files</Filter>
+      <Filter>narl</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

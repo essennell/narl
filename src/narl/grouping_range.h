@@ -50,7 +50,7 @@ namespace narl
 
 			struct grouping
 			{
-				grouping( const key_type & key, const iterable_range< typename value_type::const_iterator, typename value_type::value_type > & values )
+				grouping( key_type key, iterable_range< typename value_type::const_iterator, typename value_type::value_type > values )
 					: key{ key }, values{ values }
 					{ }
 				key_type key;
@@ -59,7 +59,7 @@ namespace narl
 
 
 		public:
-			grouping_range( const range_type & r, const key_selector & key )
+			grouping_range( range_type r, key_selector key )
 				: r{ r }, key( key ), before_begin{ false }
 			{
 			}
@@ -131,7 +131,7 @@ namespace narl
 
 
 	template< typename key_selector >
-	auto groupby( const key_selector & key )
+	auto groupby( key_selector key )
 		-> decltype( make_factory< grouping_range >( key ) )
 	{
 		return make_factory< grouping_range >( key );

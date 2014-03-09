@@ -45,7 +45,7 @@ namespace narl
 
 
 		public:
-			selectmany_range( const range_type & r, const binder & expr )
+			selectmany_range( range_type r, binder expr )
 				: r{ r }, expr( expr )
 			{
 			}
@@ -112,7 +112,7 @@ namespace narl
 	};
 
 	template< typename binder >
-	auto selectmany( const binder & b ) -> decltype( make_factory< selectmany_range >( b ) )
+	auto selectmany( binder b ) -> decltype( make_factory< selectmany_range >( b ) )
 	{
 		return make_factory< selectmany_range >( b );
 	}

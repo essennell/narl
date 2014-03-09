@@ -30,7 +30,7 @@ namespace narl
 {
 
 	template< typename range_type, typename factory_type >
-	auto operator|( const range_type & r, const factory_type & factory )
+	auto operator|( range_type r, factory_type factory )
 		-> decltype( factory( r ) )
 	{
 		return factory( r );
@@ -38,28 +38,28 @@ namespace narl
 
 
 	template< typename range_type >
-	auto operator|( const range_type & r, const range_0_factory< range_validator > & v ) -> bool
+	auto operator|( range_type r, range_0_factory< range_validator > v ) -> bool
 	{
 		auto result = v( r );
 		return result.value();
 	}
 
 	template< typename range_type, typename argument_type >
-	auto operator|( const range_type & r, const range_2_factory< range_predicate, argument_type > & v ) -> bool
+	auto operator|( range_type r, range_2_factory< range_predicate, argument_type > v ) -> bool
 	{
 		auto result = v( r );
 		return result.value();
 	}
 
 	template< typename range_type, typename argument_type >
-	auto operator|( const range_type & r, const range_2_factory< range_predicate_inverter, argument_type > & v ) -> bool
+	auto operator|( range_type r, range_2_factory< range_predicate_inverter, argument_type > v ) -> bool
 	{
 		auto result = v( r );
 		return result.value();
 	}
 
 	template< typename range_type, typename other_range_type >
-	auto operator|( const range_type & r, const range_2_factory< range_equality_default, other_range_type > & v ) -> bool
+	auto operator|( range_type r, range_2_factory< range_equality_default, other_range_type > v ) -> bool
 	{
 		auto result = v( r );
 		return result.value();
@@ -69,14 +69,14 @@ namespace narl
 #ifndef _MSC_VER
 
 	template< typename range_type, typename other_range_type, typename comparitor >
-	auto operator|( const range_type & r, const range_N_factory< range_equality, other_range_type, comparitor > & v ) -> bool
+	auto operator|( range_type r, range_N_factory< range_equality, other_range_type, comparitor > v ) -> bool
 	{
 		auto result = v( r );
 		return result.value();
 	}
 
 	template< typename range_type, typename argument_type, typename accumulator >
-	auto operator|( const range_type & r, const range_N_factory< range_accumulate, argument_type, accumulator > & v ) -> decltype( v( r ).value() )
+	auto operator|( range_type r, range_N_factory< range_accumulate, argument_type, accumulator > v ) -> decltype( v( r ).value() )
 	{
 		auto result = v( r );
 		return result.value();
@@ -85,14 +85,14 @@ namespace narl
 #else
 
 	template< typename range_type, typename other_range_type, typename comparitor >
-	auto operator|( const range_type & r, const range_3_factory< range_equality, other_range_type, comparitor > & v ) -> bool
+	auto operator|( range_type r, range_3_factory< range_equality, other_range_type, comparitor > v ) -> bool
 	{
 		auto result = v( r );
 		return result.value();
 	}
 
 	template< typename range_type, typename argument_type, typename accumulator >
-	auto operator|( const range_type & r, const range_3_factory< range_accumulate, argument_type, accumulator > & v ) -> decltype( v( r ).value() )
+	auto operator|( range_type r, range_3_factory< range_accumulate, argument_type, accumulator > v ) -> decltype( v( r ).value() )
 	{
 		auto result = v( r );
 		return result.value();
@@ -101,14 +101,14 @@ namespace narl
 #endif
 
 	template< typename range_type, typename accumulator >
-	auto operator|( const range_type & r, const range_2_factory< range_default_accumulate, accumulator > & v ) -> decltype( v( r ).value() )
+	auto operator|( range_type r, range_2_factory< range_default_accumulate, accumulator > v ) -> decltype( v( r ).value() )
 	{
 		auto result = v( r );
 		return result.value();
 	}
 
 	template< typename range_type >
-	auto operator|( const range_type & r, const range_0_factory< range_counter > & v ) -> decltype( v( r ).value() )
+	auto operator|( range_type r, range_0_factory< range_counter > v ) -> decltype( v( r ).value() )
 	{
 		auto result = v( r );
 		return result.value();

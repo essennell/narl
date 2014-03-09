@@ -48,7 +48,7 @@ namespace narl
 			
 
 		public:
-			diffing_range( const range_type & r, const other_range & o, const comparer & cmp )
+			diffing_range( range_type r, other_range o, comparer cmp )
 				: r{ r }, o{ o }, cmp( cmp ), skip{ skip_forward }
 			{
 			}
@@ -123,7 +123,7 @@ namespace narl
 	{
 
 		public:
-			diffing_range_default( const range_type & r, const other_range & o )
+			diffing_range_default( range_type r, other_range o )
 				: diffing_range< range_type, other_range, std::less< decltype( *r ) > >( r, o, std::less< decltype( *r ) >() )
 			{
 			}
@@ -132,13 +132,13 @@ namespace narl
 
 
 	template< typename range_type, typename comparer >
-	auto except( const range_type & r, const comparer & cmp ) -> decltype( make_factory< diffing_range >( r, cmp ) )
+	auto except( range_type r, comparer cmp ) -> decltype( make_factory< diffing_range >( r, cmp ) )
 	{
 		return make_factory< diffing_range >( r, cmp );
 	}
 
 	template< typename range_type >
-	auto except( const range_type & r )
+	auto except( range_type r )
 		-> decltype( make_factory< diffing_range_default >( r ) )
 	{
 		return make_factory< diffing_range_default >( r );

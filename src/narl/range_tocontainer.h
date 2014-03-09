@@ -14,7 +14,7 @@ namespace narl
 		public:
 
 			template< typename range_type >
-			auto operator()( const range_type & r ) const 
+			auto operator()( range_type r ) const 
 #ifndef _MSC_VER
 				-> container_type< decltype( *r ) >
 #else

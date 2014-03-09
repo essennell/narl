@@ -19,7 +19,7 @@ namespace narl
 
 			
 		public:
-			unioning_range( const range_type & r, const other_range & o, const comparer & cmp )
+			unioning_range( range_type r, other_range o, comparer cmp )
 				: r{ r }, o{ o }, cmp( cmp )
 			{
 			}
@@ -99,7 +99,7 @@ namespace narl
 	{
 		
 		public:
-			unioning_range_default( const range_type & r, const other_range & o )
+			unioning_range_default( range_type r, other_range o )
 				: unioning_range< range_type, other_range, std::less< decltype( *r ) > >( r, o, std::less< decltype( *r ) >() )
 			{
 			}
@@ -107,14 +107,14 @@ namespace narl
 
 
 	template< typename range_type, typename comparer >
-	auto union_with( const range_type & r, const comparer & cmp )
+	auto union_with( range_type r, comparer cmp )
 		-> decltype( make_factory< unioning_range >( r, cmp ) )
 	{
 		return make_factory< unioning_range >( r, cmp );
 	}
 
 	template< typename range_type >
-	auto union_with( const range_type & r ) 
+	auto union_with( range_type r ) 
 		-> decltype( make_factory< unioning_range_default >( r ) )
 	{
 		return make_factory< unioning_range_default >( r );

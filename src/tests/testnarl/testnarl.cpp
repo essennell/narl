@@ -9,6 +9,7 @@
 #include <deque>
 #include <forward_list>
 #include <list>
+#include <set>
 #include <string>
 #include <vector>
 
@@ -957,6 +958,18 @@ TEST_CASE( "Range can be used to create a deque", "[narl][range][container][dequ
 	REQUIRE( std::equal( std::begin( src ), std::end( src ), std::begin( d ) ) );
 }
 
+#ifndef _MSC_VER
+
+TEST_CASE( "Range can be used to create a set", "[narl][range][container][set]" )
+{
+	std::vector< int > src { 2, 4, 8 };
+	auto r = from( src );
+	auto d = r | to< std::set >();
+
+	REQUIRE( std::equal( std::begin( src ), std::end( src ), std::begin( d ) ) );
+}
+
+#endif
 
 TEST_CASE( "Range can be used to create a forward list", "[narl][range][container][forward_list]" )
 {

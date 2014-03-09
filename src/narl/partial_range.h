@@ -16,7 +16,7 @@ namespace narl
 
 
 		public:
-			partial_range( const range_type & r, const limiting_type & limiter )
+			partial_range( range_type r, limiting_type limiter )
 				: r{ r }, limiter{ limiter }
 			{
 			}
@@ -198,7 +198,7 @@ namespace narl
 
 
 		public:
-			skipping_while( const expression & expr ) 
+			skipping_while( expression expr ) 
 				: skipped{ false }, expr( expr ), pos{ 1 }
 			{ }
 
@@ -251,7 +251,7 @@ namespace narl
 	};
 
 	template< typename expression >
-	auto make_skipping_while( const expression & expr ) -> skipping_while< expression >
+	auto make_skipping_while( expression expr ) -> skipping_while< expression >
 	{
 		return skipping_while< expression >{ expr };
 	}
@@ -266,14 +266,14 @@ namespace narl
 
 
 		public:
-			taking_while( const expression & expr ) 
+			taking_while( expression expr ) 
 				: expr( expr ), stopped{ false }, pos{ 1 }
 			{ }
 
 
 		private:
 			template< typename range_type >
-			bool check( const range_type & r )
+			bool check( range_type r )
 			{
 				if( !stopped && r && !expr( *r ) )
 					stopped = true;
@@ -281,7 +281,7 @@ namespace narl
 			}
 			
 			template< typename range_type >
-			void skip( const range_type & r ) 
+			void skip( range_type r ) 
 			{ 
 				check( r ); 
 			}
@@ -326,7 +326,7 @@ namespace narl
 	};
 
 	template< typename expression >
-	auto make_taking_while( const expression & expr ) -> taking_while< expression >
+	auto make_taking_while( expression expr ) -> taking_while< expression >
 	{
 		return taking_while< expression >{ expr };
 	}
@@ -344,13 +344,13 @@ namespace narl
 
 
 	template< typename expression >
-	auto skip_while( const expression & expr ) -> decltype( make_factory< partial_range >( make_skipping_while( expr ) ) )
+	auto skip_while( expression expr ) -> decltype( make_factory< partial_range >( make_skipping_while( expr ) ) )
 	{
 		return make_factory< partial_range >( make_skipping_while( expr ) );
 	}
 
 	template< typename expression >
-	auto take_while( const expression & expr ) -> decltype( make_factory< partial_range >( make_taking_while( expr ) ) )
+	auto take_while( expression expr ) -> decltype( make_factory< partial_range >( make_taking_while( expr ) ) )
 	{
 		return make_factory< partial_range >( make_taking_while( expr ) );
 	}

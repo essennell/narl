@@ -40,7 +40,7 @@ namespace narl
 
 
 		public:
-			sorted_range( const range_type & r, const ordering & cmp )
+			sorted_range( range_type r, ordering cmp )
 				: before_begin{ false }, r{ r }, cmp( cmp )
 			{
 			}
@@ -120,7 +120,7 @@ namespace narl
 	{
 
 		public:
-			sorted_range_default( const range_type & r )
+			sorted_range_default( range_type r )
 				: sorted_range< range_type, std::less< decltype( *std::declval< range_type >() ) > >( r, std::less< decltype( *r ) >() )
 			{
 			}
@@ -129,7 +129,7 @@ namespace narl
 
 
 	template< typename ordering >
-	auto sorted( const ordering & cmp ) -> decltype( make_factory< sorted_range >( cmp ) )
+	auto sorted( ordering cmp ) -> decltype( make_factory< sorted_range >( cmp ) )
 	{
 		return make_factory< sorted_range >( cmp );
 	}

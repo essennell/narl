@@ -20,13 +20,13 @@ namespace narl
 		public:
 
 			template< typename other_range_type >
-			auto operator()( const other_range_type & r ) const -> reversed_range< other_range_type >
+			auto operator()( other_range_type r ) const -> reversed_range< other_range_type >
 			{
 				return reversed_range< other_range_type >{ r };
 			}
 
 			template< typename other_range_type >
-			auto operator()( const reversed_range< other_range_type > & r ) const -> other_range_type
+			auto operator()( reversed_range< other_range_type > r ) const -> other_range_type
 			{
 				return r.r;
 			}
@@ -56,7 +56,7 @@ namespace narl
 
 
 		public:
-			reversed_range( const range_type & r )
+			reversed_range( range_type r )
 				: r{ r }, retro{ r }, reversed{ false }
 			{
 			}

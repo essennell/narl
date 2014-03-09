@@ -16,7 +16,7 @@ namespace narl
 
 
 		public:
-			transforming_range( const range_type & r, const transformation & expr )
+			transforming_range( range_type r, transformation expr )
 				: r{ r }, expr( expr )
 			{
 			}
@@ -67,7 +67,7 @@ namespace narl
 
 
 	template< typename expression >
-	auto select( const expression & expr ) -> decltype( make_factory< transforming_range >( expr ) )
+	auto select( expression expr ) -> decltype( make_factory< transforming_range >( expr ) )
 	{
 		return make_factory< transforming_range >( expr );
 	}

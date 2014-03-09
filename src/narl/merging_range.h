@@ -17,7 +17,7 @@ namespace narl
 			
 
 		public:
-			merging_range( const range_type & r, const other_range_type & o, const comparitor & cmp )
+			merging_range( range_type r, other_range_type o, comparitor cmp )
 				: r{ r }, o{ o }, cmp( cmp )
 			{
 			}
@@ -94,7 +94,7 @@ namespace narl
 	{
 
 		public:
-			merging_range_default( const range_type & r, const other_range_type & o )
+			merging_range_default( range_type r, other_range_type o )
 				: merging_range< range_type, other_range_type, std::less< decltype( *r ) > >( r, o, std::less< decltype( *r ) >() )
 			{
 			}
@@ -103,13 +103,13 @@ namespace narl
 
 
 	template< typename other_range_type, typename comparitor >
-	auto merge_with( const other_range_type & o, const comparitor & cmp ) -> decltype( make_factory< merging_range >( o, cmp ) )
+	auto merge_with( other_range_type o, comparitor cmp ) -> decltype( make_factory< merging_range >( o, cmp ) )
 	{
 		return make_factory< merging_range >( o, cmp );
 	}
 
 	template< typename other_range_type >
-	auto merge_with( const other_range_type & o ) -> decltype( make_factory< merging_range_default >( o ) )
+	auto merge_with( other_range_type o ) -> decltype( make_factory< merging_range_default >( o ) )
 	{
 		return make_factory< merging_range_default >( o );
 	}

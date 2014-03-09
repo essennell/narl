@@ -1,0 +1,39 @@
+CLANGINC=-Id:/bin/mingw64/include/c++/4.8.1 -Id:/bin/mingw64/include/c++/4.8.1/x86_64-w64-mingw32 -pedantic
+INCLUDE=-Inarl -I/work/dev/lib/boost_1_55_0 -I../externals/catch/single_include
+OBJDIR=tmp
+SRCDIR=tests/perf
+
+OBJS=	$(OBJDIR)/narl_speed.o \
+
+CPPFLAGS=-std=c++11 -Wall -Wextra -Wpedantic -O3
+CC=g++ 
+
+.PHONY: tests
+tests: testnarlspeed.exe
+	.\testnarlspeed.exe -s
+
+.PHONY: clean
+clean:
+	-rm $(OBJS)
+	-rm testnarlspeed.exe
+
+.PHONY: release
+release:
+	echo $(CC) $(CPPFLAGS) $(INCLUDE) -O3 -o narl_tests_opt.exe $(SRCDIR)/*.cpp
+
+testnarlspeed.exe: $(OBJS)
+	$(CC) $(CPPFLAGS) -o $@ $^
+
+include $(OBJS:.o=.d)
+
+$(OBJDIR):
+	-mkdir $(OBJDIR)
+
+$(OBJDIR)/%.o: $(SRCDIR)/%.cpp 
+	$(CC) $(CPPFLAGS) -c -o $@ $< $(INCLUDE)
+
+$(OBJDIR)/%.d: $(SRCDIR)/%.cpp
+	@set -e; rm -f $@; \
+	$(CC) -MM $(CPPFLAGS) $(INCLUDE) $< > $@.$$$$; \
+	sed 's,\($*\)\.o[ :]*,$(OBJDIR)/\1.o $@ : ,g' < $@.$$$$ > $@; \
+	rm -f $@.$$$$

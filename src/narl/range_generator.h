@@ -59,7 +59,7 @@ namespace narl
 			callback fn;
 
 		public:
-			range_generator_callback( const item_type & init, const callback & fn ) 
+			range_generator_callback( const item_type & init, callback fn ) 
 				: v{ init }, fn( fn )
 			{
 			}
@@ -127,7 +127,7 @@ namespace narl
 	}
 
 	template< typename item_type, typename callback >
-	auto make_range( const item_type & init, const callback & fn ) -> range_generator_callback< item_type, callback >
+	auto make_range( const item_type & init, callback fn ) -> range_generator_callback< item_type, callback >
 	{
 		return range_generator_callback< item_type, callback >{ init, fn };
 	}

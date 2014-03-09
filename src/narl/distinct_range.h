@@ -16,7 +16,7 @@ namespace narl
 
 
 		public:
-			distinct_range( const range_type & r, const comparer & cmp )
+			distinct_range( range_type r, comparer cmp )
 				: r{ r }, cmp( cmp )
 			{
 			}
@@ -84,7 +84,7 @@ namespace narl
 	{
 
 		public:
-			distinct_range_default( const range_type & r )
+			distinct_range_default( range_type r )
 				: distinct_range< range_type, std::equal_to< decltype( *r ) > >( r, std::equal_to< decltype( *r ) >() )
 			{
 			}

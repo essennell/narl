@@ -17,7 +17,7 @@ namespace narl
 
 
 		public:
-			concatenating_range( const range_type & r, const other_range & o )
+			concatenating_range( range_type r, other_range o )
 				: r{ r }, o{ o }, before_begin{ false }
 			{
 			}
@@ -84,7 +84,7 @@ namespace narl
 
 
 	template< typename range_type >
-	auto concat( const range_type & r ) -> decltype( make_factory< concatenating_range >( r ) )
+	auto concat( range_type r ) -> decltype( make_factory< concatenating_range >( r ) )
 	{
 		return make_factory< concatenating_range >( r );
 	}

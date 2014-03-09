@@ -112,7 +112,7 @@ namespace narl
 			class range_wrapper : public range_adapter
 			{
 				public:
-				range_wrapper( const range_type & r )
+				range_wrapper( range_type r )
 					: r{ r }
 				{
 				}
